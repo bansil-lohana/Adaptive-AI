@@ -1,0 +1,83 @@
+Fix the camera behavior in my Adaptive AI React Native / Expo app.
+
+BUG:
+When the user opens the Live AI Analysis camera screen and presses the red "Stop & Close Camera" button, the recording may stop, but the camera preview remains active. The camera must completely stop and release the device camera.
+
+REQUIREMENTS:
+
+1. Find the camera component/screen responsible for the "LIVE AI ANALYSIS" interface and the "Stop & Close Camera" button.
+
+2. When the user presses "Stop & Close Camera":
+   - Stop any active video recording.
+   - Stop all camera-related processing/analysis loops.
+   - Stop any frame capture or AI analysis timers.
+   - Cancel/cleanup any camera-related subscriptions, intervals, animation loops, or listeners.
+   - Release the camera hardware.
+   - Completely unmount/remove the CameraView component.
+   - Close the camera screen and return to the appropriate previous screen.
+   - Update all camera/recording state variables so the app knows the camera is OFF.
+
+3. IMPORTANT:
+   Do NOT simply set `isRecording` to false. That only changes the recording state while the CameraView can remain mounted.
+
+   The camera component must be conditionally rendered using a state such as:
+
+   `isCameraOpen`
+
+   Example behavior:
+
+   `isCameraOpen === true`
+   → render CameraView
+
+   `isCameraOpen === false`
+   → CameraView is NOT rendered/unmounted.
+
+4. Implement a reliable cleanup function, for example:
+
+   `handleStopCamera()`
+
+   It should safely:
+   - stop recording if active
+   - cancel AI analysis
+   - clear intervals/timeouts
+   - remove listeners/subscriptions
+   - reset recording state
+   - set camera state to closed
+   - navigate back if appropriate
+
+5. Make sure cleanup also happens when the user:
+   - presses the Android back button
+   - navigates away from the camera screen
+   - closes the camera screen in any other way
+   - the component unmounts
+
+6. Use React `useEffect` cleanup where appropriate so the camera cannot remain active after leaving the screen.
+
+7. Prevent race conditions:
+   - The Stop button should be safe to press multiple times.
+   - Do not call stopRecording() if there is no active recording.
+   - Do not attempt to use the camera after it has been closed.
+   - Avoid setting state after the component has unmounted.
+
+8. Preserve the existing UI exactly:
+   - Keep the current camera interface.
+   - Keep the "LIVE AI ANALYSIS" badge.
+   - Keep the Adaptive AI panel.
+   - Keep the red Stop button.
+   - Do not redesign the screen.
+   - Only fix the camera lifecycle/cleanup behavior.
+
+9. After making the changes, check the entire camera flow:
+   Open Camera → Camera starts → Start recording/AI analysis → Press Stop & Close Camera → Recording stops → AI processing stops → CameraView unmounts → Device camera is released → Previous screen appears.
+
+10. Do not create a second camera implementation. Modify the existing camera implementation and reuse the existing state, refs, navigation, and components wherever possible.
+
+11. Check for any existing `CameraView`, `Camera`, `useCameraPermissions`, recording refs, timers, `setInterval`, `setTimeout`, animation loops, frame processors, or subscriptions and make sure they are properly cleaned up.
+
+12. After fixing it, explain:
+   - Which file(s) you changed.
+   - What was causing the camera to remain active.
+   - How the new cleanup works.
+   - How you verified that pressing "Stop & Close Camera" completely releases the camera.
+
+Do not make unrelated changes to the application.

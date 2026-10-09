@@ -1,0 +1,468 @@
+# Temporary Mock Authentication — Development Mode
+
+The application currently has **NO database and NO real authentication backend**.
+
+For now, implement a **temporary local/mock authentication system** so I can fully test the Login, Sign Up, Profile, Change Password, Forgot Password, and Logout flows.
+
+This is DEVELOPMENT MODE only.
+
+## 1. Dummy Account Support
+
+Allow users to create accounts with any valid-looking email address and password.
+
+Example:
+
+```text
+Email:
+asad@example.com
+
+Password:
+12345678
+```
+
+The application should NOT require the email to exist in a real database.
+
+For development purposes, save the mock account locally using the appropriate local storage mechanism for the existing framework.
+
+---
+
+## 2. Mock Registration
+
+When the user uses:
+
+**Sign Up → Create Account**
+
+accept the registration if:
+
+* Name is provided
+* Email has valid email format
+* Password meets the application's minimum password requirement
+* Confirm password matches
+
+Then save something similar to:
+
+```text
+User
+├── id
+├── name
+├── email
+├── password
+└── profile information
+```
+
+The password is acceptable to store locally ONLY because this is a temporary development/mock authentication system.
+
+Add a clear code comment that this must NOT be used in production.
+
+---
+
+## 3. Mock Login
+
+The Login screen should authenticate against the locally stored mock account.
+
+Example:
+
+```text
+Email:
+asad@example.com
+
+Password:
+12345678
+```
+
+If the credentials match:
+
+```text
+Login
+↓
+Authenticated
+↓
+Home
+```
+
+If they don't match, show:
+
+**Invalid email or password.**
+
+Do not allow access to authenticated screens when the credentials are incorrect.
+
+---
+
+## 4. Temporary Demo Account
+
+Also provide an optional development/demo account so I can immediately test the application without registering every time.
+
+Example:
+
+```text
+Email:
+demo@adaptiveai.com
+
+Password:
+Demo@123
+```
+
+Add a subtle development-only option such as:
+
+**Use Demo Account**
+
+This should only exist in development mode.
+
+Do NOT expose this demo account in the production build.
+
+---
+
+## 5. Mock Session
+
+After successful login, create a local authentication session.
+
+The application should remember the logged-in state when appropriate.
+
+Example:
+
+```text
+Login
+↓
+Save session locally
+↓
+Home
+```
+
+When the application is reopened:
+
+```text
+Session exists
+↓
+Home
+```
+
+If there is no session:
+
+```text
+No session
+↓
+Login
+```
+
+---
+
+## 6. Mock Logout
+
+When the user goes to:
+
+**Profile → Log out**
+
+show the confirmation dialog:
+
+### Log out?
+
+Are you sure you want to log out of your Adaptive AI account?
+
+Buttons:
+
+**Cancel**
+
+**Log out**
+
+After confirmation:
+
+```text
+Clear local authentication session
+↓
+Login
+```
+
+The user should not be able to navigate back into authenticated screens using the back button.
+
+---
+
+## 7. Mock Change Password
+
+The existing:
+
+**Profile → Account → Change Password**
+
+should work with the mock authentication system.
+
+Fields:
+
+* Current password
+* New password
+* Confirm new password
+
+Validate the current password against the locally stored mock account.
+
+If correct:
+
+```text
+Update local password
+↓
+Password changed successfully
+```
+
+If incorrect:
+
+**Current password is incorrect.**
+
+---
+
+## 8. Mock Edit Profile
+
+The existing Edit Profile functionality should update the locally stored mock user.
+
+Allow:
+
+* Name
+* Email if supported
+* Profile initials/avatar
+
+Example:
+
+```text
+Name:
+Asadullah Malik
+```
+
+After saving, the Home screen should automatically reflect the updated name.
+
+For example:
+
+**Good evening, Asadullah 👋**
+
+---
+
+## 9. Mock Forgot Password
+
+Because there is currently no email service, implement a simulated password-reset flow.
+
+User selects:
+
+**Forgot password?**
+
+Then:
+
+```text
+Enter email
+↓
+Send Reset Link
+↓
+Show simulated success screen
+```
+
+Display:
+
+**Check your email**
+
+For development mode, provide a way to continue to the Reset Password screen without actually sending an email.
+
+Clearly label this as a development simulation.
+
+For example:
+
+**Development mode: Continue to reset password**
+
+Do NOT implement a fake email service.
+
+---
+
+## 10. Mock Reset Password
+
+Allow the user to enter:
+
+* New password
+* Confirm new password
+
+Then update the locally stored mock password.
+
+Show:
+
+**Password updated successfully.**
+
+Then:
+
+**Continue to Login**
+
+---
+
+## 11. Architecture Requirement
+
+IMPORTANT:
+
+Do not tightly couple the UI directly to local storage.
+
+Create a clean authentication abstraction, for example:
+
+```text
+AuthService
+    ↓
+MockAuthService
+    ↓
+Local Storage
+```
+
+The UI should communicate with `AuthService`, not directly with local storage.
+
+This is important because later I will replace:
+
+```text
+MockAuthService
+```
+
+with something like:
+
+```text
+FirebaseAuthService
+```
+
+or:
+
+```text
+SupabaseAuthService
+```
+
+or:
+
+```text
+BackendAuthService
+```
+
+without having to redesign the entire application.
+
+---
+
+## 12. Development vs Production
+
+Create a clear separation between development/mock authentication and future production authentication.
+
+Use a configuration/environment flag such as:
+
+```text
+AUTH_MODE=mock
+```
+
+For now:
+
+```text
+AUTH_MODE=mock
+```
+
+Later:
+
+```text
+AUTH_MODE=production
+```
+
+Do not expose demo credentials or development bypasses in production builds.
+
+---
+
+## 13. Important Security Warning
+
+This is ONLY temporary development authentication.
+
+Do NOT present this implementation as secure production authentication.
+
+When the real backend/database is integrated later:
+
+* Passwords must not be stored as plain text.
+* Authentication must be handled securely.
+* Sessions/tokens must be managed securely.
+* Password reset must use a real secure mechanism.
+* Demo accounts must be removed.
+* Development bypasses must be removed.
+
+Add TODO comments in the relevant code indicating where the real authentication implementation must replace the mock implementation.
+
+---
+
+## 14. Final Testing
+
+After implementing the mock authentication, verify these complete flows:
+
+### Registration
+
+```text
+Sign Up
+↓
+Create Account
+↓
+Home
+```
+
+### Login
+
+```text
+Login
+↓
+Dummy email/password
+↓
+Home
+```
+
+### Invalid Login
+
+```text
+Wrong credentials
+↓
+Invalid email or password
+```
+
+### Logout
+
+```text
+Profile
+↓
+Log out
+↓
+Confirmation
+↓
+Login
+```
+
+### Change Password
+
+```text
+Profile
+↓
+Change Password
+↓
+Current password
+↓
+New password
+↓
+Success
+```
+
+### Edit Profile
+
+```text
+Profile
+↓
+Edit Profile
+↓
+Change name
+↓
+Save
+↓
+Updated Home greeting
+```
+
+### Forgot Password
+
+```text
+Login
+↓
+Forgot password
+↓
+Email
+↓
+Development reset flow
+↓
+New password
+↓
+Login
+```
+
+Make sure all existing screens and bottom navigation continue to work.
+
+Do not redesign the existing Adaptive AI UI while implementing this functionality.

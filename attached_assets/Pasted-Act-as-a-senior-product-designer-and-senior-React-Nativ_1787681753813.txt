@@ -1,0 +1,277 @@
+Act as a senior product designer and senior React Native/Expo engineer. Refine the existing Adaptive AI Home screen to make it production-ready and industry-level.
+
+IMPORTANT:
+
+* Do NOT completely redesign the existing screen.
+* Preserve the current Adaptive AI branding, dark navy + teal + soft peach color direction, and overall visual identity.
+* Improve hierarchy, spacing, usability, accessibility, and visual polish.
+* Do NOT add unnecessary features or overcrowd the dashboard.
+* Make the result feel like a premium modern AI productivity/education app.
+
+## 1. HEADER — FIX PROFILE/GREETING COLLISION
+
+Current issue:
+The profile avatar visually merges with the "Good evening, ASAD" greeting.
+
+Change the header structure to:
+
+ADAPTIVE AI                                      [AS]
+
+Good evening, Asad 👋
+Here's what's happening today.
+
+Requirements:
+
+* Remove the redundant "Home" text from the top-left.
+* Keep the "ADAPTIVE AI" brand label at the top-left.
+* Move the profile avatar to the top-right and align it vertically with the "ADAPTIVE AI" label.
+* Avatar size: approximately 36–40px.
+* Keep "AS" inside the avatar.
+* Give the avatar its own clear visual container/background.
+* Maintain sufficient horizontal spacing from the right edge.
+* Do NOT place the avatar beside or directly aligned with the greeting.
+* Use "Asad" instead of "ASAD" in the greeting.
+* Keep the 👋 greeting emoji subtle.
+* Make the profile avatar fully tappable and navigate to the Profile screen.
+* Ensure the header has comfortable vertical spacing before the Next Class card.
+
+## 2. NEXT CLASS CARD
+
+Improve the card hierarchy and make it feel dynamic.
+
+Use this structure:
+
+NEXT CLASS · IN 42 MIN
+
+Database Systems
+
+12:00 PM · DB-04
+
+View schedule →
+
+Requirements:
+
+* Replace the isolated arrow icon with clear "View schedule →" text.
+* Dynamically calculate and display the remaining time.
+* Examples:
+
+  * "NEXT CLASS · IN 42 MIN"
+  * "NEXT CLASS · IN 5 MIN"
+  * "NEXT CLASS · STARTING NOW"
+  * "NEXT CLASS · TOMORROW"
+* Keep the soft peach card styling.
+* Make the entire card tappable.
+* Preserve strong contrast and readability.
+* Make the course name the primary visual element.
+* Keep room and time as secondary information.
+
+## 3. ADAPTIVE AI CARD — PRIMARY CTA
+
+This is the core feature of the application, so make it the strongest interactive component on the Home screen.
+
+Use:
+
+YOUR ADAPTIVE AI
+
+Ask Adaptive AI
+How can I help you today?
+
+[ Voice ]    [ Camera ]    [ Text ]
+
+Requirements:
+
+* Make "Ask Adaptive AI" visually dominant.
+* Keep the dark navy card.
+* Keep the teal accent.
+* Make the three interaction methods visually consistent.
+* Give each interaction button a minimum touch target of approximately 44x44px.
+* Make the entire AI card feel interactive.
+* Use subtle press feedback.
+* Do not overuse shadows or gradients.
+* Add a subtle example prompt only if it fits naturally without overcrowding:
+  "Explain normalization in simple terms"
+* The AI section should immediately communicate that this is the primary action of the application.
+
+## 4. RECENT ACTIVITY — IMPROVE EMPTY STATE
+
+The current "No activity yet" state looks unfinished.
+
+Replace it with a designed empty state:
+
+Recent activity                              See all →
+
+```
+                ✨
+
+          Nothing here yet
+```
+
+Your questions, solutions and
+AI conversations will appear here.
+
+```
+          Ask Adaptive AI
+```
+
+Requirements:
+
+* Use a subtle empty-state illustration/icon.
+* Clearly explain what will appear here.
+* Include a clear CTA to start using Adaptive AI.
+* Replace the standalone arrow icon with "See all →".
+* Once activity exists, dynamically replace the empty state with real recent activity.
+* Keep this section visually lighter than the primary AI card.
+
+## 5. BOTTOM NAVIGATION
+
+Reduce the navigation complexity from 6 items to 5.
+
+Preferred structure:
+
+Home | Schedule | AI | History | Profile
+
+Requirements:
+
+* Remove the dedicated Camera tab.
+* Camera should be accessed through Adaptive AI.
+* Move Settings inside the Profile section.
+* Make the AI tab visually recognizable as the core feature.
+* Keep labels short and readable.
+* Maintain a consistent icon style.
+* Ensure active/inactive states have clear contrast.
+* Respect safe-area insets on Android and iOS.
+
+## 6. SPACING SYSTEM
+
+Create a consistent spacing system.
+
+Use approximately:
+
+Screen horizontal padding: 20–24px
+Major section spacing: 20–24px
+Card internal padding: 16–20px
+Small element spacing: 8–12px
+
+Do not allow components to feel cramped.
+
+Maintain consistent alignment of:
+
+* Header
+* Next Class
+* Adaptive AI
+* Recent Activity
+
+## 7. CORNER RADIUS
+
+Create consistent radius tokens:
+
+Large cards: 20–24px
+Small cards/buttons: 12–16px
+Avatar: circular
+Bottom navigation container: consistent with the existing design language
+
+Do not give every element a different radius.
+
+## 8. TYPOGRAPHY
+
+Establish a clear hierarchy:
+
+Greeting:
+28–30px, bold/semibold
+
+Section titles:
+18–20px, semibold
+
+Card titles:
+18–20px, semibold
+
+Body text:
+14–15px
+
+Metadata/labels:
+11–12px, medium
+
+Keep "ADAPTIVE AI", "NEXT CLASS", and similar labels subtle rather than visually dominant.
+
+## 9. COLOR SYSTEM
+
+Preserve the existing color direction:
+
+* Dark navy for primary AI surfaces
+* Teal/cyan for Adaptive AI accents
+* Soft peach for schedule information
+* Off-white/light background
+* Dark charcoal/navy primary text
+
+Create reusable design tokens rather than hardcoding random colors throughout the screen.
+
+Do not introduce unnecessary new colors.
+
+## 10. INTERACTION POLISH
+
+Add subtle production-quality micro-interactions:
+
+* Card press scale: approximately 0.98
+* Button press feedback
+* Smooth navigation transitions
+* Loading states
+* Skeleton/loading state where appropriate
+* Dynamic class countdown
+* Subtle AI loading animation
+
+Keep animations around 150–300ms and avoid excessive animation.
+
+## 11. ACCESSIBILITY
+
+Ensure:
+
+* Interactive controls have approximately 44x44px minimum touch targets.
+* Text has sufficient contrast.
+* Icons have accessible labels.
+* Font scaling does not break the layout.
+* Do not communicate important information through color alone.
+* Screen reader labels are meaningful.
+
+## 12. RESPONSIVE DESIGN
+
+The Home screen must work correctly across:
+
+* Small Android phones
+* Standard Android phones
+* Large Android phones
+* iPhones with Dynamic Island/notches
+* Different font scaling settings
+
+Use SafeAreaView/useSafeAreaInsets appropriately.
+
+Do not rely on fixed absolute positioning for important UI elements.
+
+## 13. FINAL UX PRINCIPLE
+
+The Home screen should answer three questions immediately:
+
+1. What is happening next?
+   → Next Class
+
+2. What can I do right now?
+   → Ask Adaptive AI
+
+3. What did I do recently?
+   → Recent Activity
+
+Do not add unnecessary dashboard widgets such as GPA, weather, motivational quotes, random statistics, etc. unless they are genuinely useful and contextually relevant.
+
+The final result should feel:
+
+* Clean
+* Premium
+* Intelligent
+* Student-focused
+* Modern
+* Consistent
+* Accessible
+* Production-ready
+
+Before finishing, review the entire screen as a senior product designer and fix any spacing, alignment, typography, icon, hierarchy, or interaction inconsistencies you find.
+
+IMPORTANT: Preserve existing functionality. Only improve the UI/UX and interaction polish unless a navigation change is explicitly required above.

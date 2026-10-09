@@ -1,0 +1,24 @@
+kind = "mobile"
+previewPath = "/adaptive-ai/"
+title = "Adaptive AI"
+description = "An adaptive multimodal AI assistant for Android that lets people interact through text, voice, and camera while adjusting its interface to their preferences and accessibility needs."
+version = "1.0.0"
+id = "artifacts/adaptive-ai"
+router = "expo-domain"
+
+[[services]]
+name = "expo"
+ensurePreviewReachable = "/status"
+paths = [ "/adaptive-ai/" ]
+localPort = 23262
+
+[services.development]
+run = "pnpm --filter @workspace/adaptive-ai run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/adaptive-ai", "run", "build" ]
+run = [ "pnpm", "--filter", "@workspace/adaptive-ai", "run", "serve" ]
+
+[services.env]
+PORT = "23262"
+BASE_PATH = "/adaptive-ai/"

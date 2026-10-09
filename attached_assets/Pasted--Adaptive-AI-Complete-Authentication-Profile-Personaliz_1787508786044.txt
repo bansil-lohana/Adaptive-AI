@@ -1,0 +1,1199 @@
+# Adaptive AI — Complete Authentication, Profile, Personalization & App-Wide Design System
+
+Implement a complete, production-quality authentication flow, Profile & Settings section, personalized Home dashboard, accessibility features, and unified design system across the entire Adaptive AI app.
+
+The final application should feel like **one cohesive, professional, intelligent, adaptive, and accessible AI product**, not a collection of separately designed screens.
+
+---
+
+# 1. FIRST: INSPECT THE EXISTING APP
+
+Before making any changes:
+
+* Inspect the existing project structure, navigation, authentication logic, database/backend configuration, components, theme/styles, and Home dashboard.
+* Inspect how the authenticated user's information is currently stored and retrieved.
+* Identify where the user's:
+
+  * Name
+  * Email
+  * Profile photo
+  * Authentication state
+    are currently available.
+* Reuse existing components, services, utilities, authentication logic, database configuration, and navigation wherever possible.
+* Do NOT unnecessarily rewrite working functionality.
+* Preserve all existing Home dashboard and application functionality.
+* Identify the existing Adaptive AI branding and improve its consistency without destroying the current identity.
+* Follow the existing project's architecture and coding conventions.
+* Avoid creating duplicate components or duplicate authentication logic.
+
+---
+
+# 2. COMPLETE AUTHENTICATION FLOW
+
+Implement/refine the following flow:
+
+**Unauthenticated User**
+→ Login / Registration
+
+**Login**
+→ Home Dashboard
+
+**Registration**
+→ Home Dashboard
+
+**Forgot Password**
+→ Email
+→ Reset Link
+→ Confirmation
+→ Login
+
+**Authenticated User**
+→ Home Dashboard
+→ Profile / Settings
+→ Logout
+→ Login
+
+Authentication state must persist correctly between app launches.
+
+Authenticated users should not unnecessarily see Login or Registration screens.
+
+Unauthenticated users should not be able to access protected application screens.
+
+---
+
+# 3. LOGIN SCREEN
+
+Create/refine the Login screen.
+
+## Header
+
+Include:
+
+* Adaptive AI branded icon/logo.
+* Heading: **"Welcome back"**
+* Supporting text: **"Sign in to continue to Adaptive AI"**
+* Small microphone/voice-guided icon near the top.
+
+## Email
+
+* Visible label above the input.
+* Email keyboard/input configuration.
+* Email validation.
+* Persistent visible label.
+* Do NOT rely on placeholder-only text.
+
+## Password
+
+* Visible label above the input.
+* Show/hide password control.
+* Password validation.
+
+## Forgot Password
+
+Display:
+
+**Forgot password?**
+
+Navigate to the Forgot Password screen.
+
+## Primary CTA
+
+**Log In**
+
+Requirements:
+
+* Full width.
+* Minimum 48px height.
+* Primary Adaptive AI teal.
+* 16px border radius.
+* White text.
+* Weight 600.
+* Subtle elevation/shadow.
+* Pressed state.
+* Disabled state.
+* Loading spinner during authentication.
+* Prevent duplicate submissions.
+
+## Google Authentication
+
+Add:
+
+**Continue with Google**
+
+Requirements:
+
+* Full width.
+* Minimum 48px height.
+* Outlined style.
+* Google icon.
+* Secondary visual priority.
+* Accessible contrast.
+
+If Google authentication is already configured, connect it to the existing authentication system.
+
+If it is not configured, create the UI and clean integration point without implementing fake authentication.
+
+## Registration Link
+
+Display:
+
+**Don't have an account? Sign Up**
+
+Make "Sign Up" clearly tappable and navigate to Registration.
+
+---
+
+# 4. LOGIN VALIDATION & ERROR STATES
+
+Implement inline validation.
+
+## Email
+
+* Empty → **"Email is required"**
+* Invalid format → **"Enter a valid email address"**
+
+## Password
+
+* Empty → **"Password is required"**
+
+## Authentication
+
+For incorrect credentials:
+
+* Show a user-friendly error message.
+* Do not expose raw Firebase/backend errors.
+* Keep the entered email.
+* Do not unnecessarily clear the form.
+
+## Error UI
+
+Invalid fields should have:
+
+* Coral/red error border.
+* Short error message below the field.
+* Optional error icon.
+* Error communication must not rely only on color.
+
+## Authentication states
+
+Implement:
+
+**Idle → Validating → Loading → Success / Failure**
+
+On success:
+
+* Navigate smoothly to Home.
+* Prevent unnecessary return to Login.
+
+On failure:
+
+* Remain on Login.
+* Show a non-blocking error banner near the top.
+* Preserve entered email.
+* Allow immediate correction.
+
+---
+
+# 5. REGISTRATION SCREEN
+
+If Registration does not already exist, create it.
+
+Fields:
+
+1. Name
+2. Email
+3. Password
+4. Confirm Password
+
+## Validation
+
+Implement:
+
+* Name required.
+* Valid email.
+* Password required.
+* Appropriate password-strength validation.
+* Confirm password must match.
+* Terms & Privacy agreement required.
+
+Use the same validation, loading, and error patterns as Login.
+
+## Terms & Privacy
+
+Add:
+
+**I agree to the Terms of Service and Privacy Policy**
+
+Requirements:
+
+* Required before account creation.
+* Terms of Service is a link.
+* Privacy Policy is a link.
+* Checkbox must have a minimum 44×44pt touch target.
+* Create Account remains disabled until required conditions are satisfied.
+
+## Primary CTA
+
+**Create Account**
+
+Use exactly the same primary button component as Login.
+
+After successful registration:
+
+* Authenticate the user.
+* Save the user's profile information using the existing backend/database architecture.
+* Navigate to Home.
+* Preserve authentication state.
+
+---
+
+# 6. FORGOT PASSWORD FLOW
+
+Create/refine the complete password reset flow.
+
+## Forgot Password Screen
+
+Include:
+
+* Adaptive AI branding.
+* Heading: **"Reset your password"**
+* Supporting explanation.
+* Email input.
+* **Send reset link** button.
+* Back to Login link.
+
+Handle:
+
+* Empty email.
+* Invalid email.
+* Unknown/unregistered email.
+* Network/backend failure.
+* Successful reset request.
+
+## Confirmation Screen
+
+Display:
+
+### "Check your email"
+
+Supporting text:
+
+**"We've sent a password reset link to your email address."**
+
+Include:
+
+* Email address used.
+* Resend option.
+* Back to Login button.
+
+Do not expose unnecessary sensitive account information.
+
+---
+
+# 7. PERSONALIZED HOME GREETING
+
+This is an important part of Adaptive AI's identity.
+
+The Home dashboard must use the **authenticated user's profile information** to personalize the experience.
+
+## Dynamic Greeting
+
+Retrieve the user's name from the existing authenticated user/profile data.
+
+Based on the user's local time, display:
+
+### Morning
+
+**"Good morning, Asad 👋"**
+
+### Afternoon
+
+**"Good afternoon, Asad 👋"**
+
+### Evening
+
+**"Good evening, Asad 👋"**
+
+Use the actual user's name dynamically.
+
+Do NOT hardcode "Asad" or any specific user's name.
+
+For example:
+
+If the user's profile name is:
+
+**Ali**
+
+show:
+
+**"Good morning, Ali 👋"**
+
+If the user's profile name is:
+
+**Sara**
+
+show:
+
+**"Good morning, Sara 👋"**
+
+## Fallback
+
+If the user's name is unavailable, empty, or has not loaded yet:
+
+Show:
+
+**"Good morning 👋"**
+
+or the appropriate time-based equivalent.
+
+Never display:
+
+* "Good morning, undefined"
+* "Good morning, null"
+* "Good morning, User"
+* An empty comma such as "Good morning, 👋"
+
+## Time-based logic
+
+Use the user's local device time.
+
+Suggested behavior:
+
+* Morning → 5:00 AM–11:59 AM
+* Afternoon → 12:00 PM–4:59 PM
+* Evening → 5:00 PM–4:59 AM
+
+Keep the greeting logic reusable so it can be used elsewhere in the application.
+
+## Loading behavior
+
+While profile information is loading:
+
+* Do not show broken text.
+* Show an appropriate skeleton/loading state or neutral greeting.
+* Once the profile is available, update the greeting smoothly.
+
+## Profile synchronization
+
+If the user changes their name from:
+
+**Profile → Edit Profile**
+
+the Home dashboard greeting should automatically update.
+
+Example:
+
+Before:
+
+**Good morning, Asad 👋**
+
+User changes name to:
+
+**Asadullah**
+
+Home should then display:
+
+**Good morning, Asadullah 👋**
+
+Do not require the user to log out and log back in to see the updated name.
+
+---
+
+# 8. PROFILE SECTION
+
+Create/refine a dedicated **Profile** screen for authenticated users.
+
+The Profile screen should be accessible from the Home dashboard through the user's avatar/profile icon or an appropriate Profile navigation item.
+
+## Profile Header
+
+Display:
+
+* Profile photo/avatar.
+* User's name.
+* User's email.
+* Edit Profile action.
+
+Use a clean card/header design consistent with Adaptive AI.
+
+## Profile Information
+
+Show:
+
+* Profile photo
+* Full name
+* Email address
+
+If additional account information already exists in the backend, display it appropriately without breaking existing functionality.
+
+---
+
+# 9. EDIT PROFILE
+
+Create/refine an **Edit Profile** screen.
+
+Allow users to modify:
+
+* Profile photo/avatar.
+* Name.
+
+Email should only be editable if the existing authentication/backend architecture safely supports email changes.
+
+## Profile photo
+
+If the existing app already supports image upload:
+
+* Reuse the existing upload functionality.
+* Allow selecting/changing/removing the profile image where supported.
+* Show loading state during upload.
+* Show a clear error if upload fails.
+
+If image upload is not yet implemented:
+
+* Build the UI cleanly.
+* Do not create fake upload behavior.
+* Keep the integration point ready for the existing storage/backend system.
+
+## Save Changes
+
+Primary button:
+
+**Save Changes**
+
+States:
+
+* Normal
+* Loading
+* Success
+* Failure
+
+Do not lose user-entered data when an update fails.
+
+After successful name/profile updates:
+
+* Update the Profile screen.
+* Update the Home dashboard greeting.
+* Update the profile avatar wherever displayed.
+* Keep the UI synchronized without requiring logout/login.
+
+---
+
+# 10. PROFILE SETTINGS
+
+The Profile section should contain a clean Settings area.
+
+Organize settings into logical groups instead of one long unstructured list.
+
+## Account
+
+Include:
+
+* Edit Profile
+* Change Password
+* Account information
+
+## Accessibility
+
+Include:
+
+* Voice-guided login
+* Text-to-speech / voice guidance settings where supported
+* Accessibility preferences
+
+## Notifications
+
+Include:
+
+* Notification preferences.
+* Push notification toggle if supported.
+* Relevant notification categories if already available.
+
+Do not create fake backend notification functionality.
+
+## Appearance
+
+Include:
+
+* Light
+* Dark
+* System
+
+If the application architecture supports theme switching.
+
+If dark mode is implemented, ensure the complete design system has appropriate dark-mode colors and WCAG-compliant contrast.
+
+## Privacy & Security
+
+Include:
+
+* Privacy Policy
+* Terms of Service
+* Change Password
+* Security-related account actions where supported
+
+## About
+
+Include:
+
+* About Adaptive AI
+* App version
+* Credits where appropriate
+
+---
+
+# 11. CHANGE PASSWORD
+
+Create/refine a Change Password screen.
+
+Fields:
+
+* Current password
+* New password
+* Confirm new password
+
+Include:
+
+* Show/hide password controls.
+* Password validation.
+* Password confirmation validation.
+* Loading state.
+* Success state.
+* User-friendly error handling.
+
+After successful password change:
+
+* Show clear confirmation.
+* Do not unexpectedly log the user out unless required by the authentication provider.
+
+---
+
+# 12. LOGOUT
+
+Add a clearly visible:
+
+**Log Out**
+
+action in Profile/Settings.
+
+Requirements:
+
+* Use a professional, restrained treatment.
+* Do not use coral merely for decoration.
+* Ask for confirmation before logout if appropriate.
+* Clear authentication state correctly.
+* Return user to Login.
+* Prevent access to authenticated screens after logout.
+
+---
+
+# 13. VOICE-GUIDED ACCESSIBILITY
+
+Accessibility is a core part of Adaptive AI's identity.
+
+Add a microphone/voice-guided control near the top of authentication screens and expose the same setting inside:
+
+**Profile → Accessibility**
+
+When enabled:
+
+* Read important form labels aloud.
+* Announce validation errors.
+* Announce important authentication states.
+* Keep spoken feedback concise.
+* Do not continuously read every UI element.
+* Respect system accessibility settings.
+
+Use the platform's appropriate text-to-speech/accessibility APIs.
+
+Do not unnecessarily create a custom audio system.
+
+---
+
+# 14. ACCESSIBILITY REQUIREMENTS
+
+Treat accessibility as a core product feature.
+
+## Touch targets
+
+All interactive elements must have a minimum:
+
+**44 × 44pt**
+
+This includes:
+
+* Buttons
+* Links
+* Icons
+* Back buttons
+* Profile avatar actions
+* Password visibility controls
+* Checkboxes
+* Toggles
+* Microphone controls
+* Navigation items
+
+## Labels
+
+Every form field must have a persistent visible label above the input.
+
+Never rely on placeholder text as the only label.
+
+## Dynamic text
+
+* Respect system font scaling.
+* Support larger accessibility text sizes.
+* Prevent text clipping and overlapping.
+* Allow buttons and layouts to adapt to larger text.
+
+## Contrast
+
+Meet:
+
+**WCAG AA — minimum 4.5:1 contrast for normal text.**
+
+Do not rely on color alone for:
+
+* Errors
+* Warnings
+* Selection
+* Success states
+
+## Screen readers
+
+Provide meaningful accessibility labels/hints for:
+
+* Buttons
+* Inputs
+* Links
+* Icons
+* Toggles
+* Checkboxes
+* Profile controls
+* Voice-guided controls
+
+---
+
+# 15. ADAPTIVE AI DESIGN SYSTEM
+
+Apply ONE unified design system across:
+
+* Login
+* Registration
+* Forgot Password
+* Password Reset Confirmation
+* Change Password
+* Profile
+* Edit Profile
+* Settings
+* Home Dashboard
+* Shared navigation/components
+
+Every screen should visually belong to the same Adaptive AI product.
+
+---
+
+# 16. COLOR SYSTEM
+
+## Primary
+
+Adaptive AI deep teal:
+
+**#0F766E**
+
+Use for:
+
+* Primary buttons
+* Active states
+* Important interactive elements
+* Branding
+* Focus indicators
+
+## Coral
+
+Use coral ONLY for:
+
+* Errors
+* Warnings
+* Important alerts
+* Critical highlights
+
+Do not use coral decoratively.
+
+## Neutral palette
+
+Use:
+
+* Background: **#F8FAFC**
+* Primary text: **#1E293B**
+* Secondary text: **#64748B**
+* Surface: **#FFFFFF**
+* Borders/dividers: subtle neutral gray
+
+Avoid excessive colors.
+
+---
+
+# 17. SPACING SYSTEM
+
+Use an 8px spacing system.
+
+Primary values:
+
+* 8px
+* 16px
+* 24px
+* 32px
+* 40px
+
+Use consistently for:
+
+* Screen padding
+* Card padding
+* Form spacing
+* Section spacing
+* Button spacing
+* Navigation spacing
+* Typography spacing
+
+Avoid arbitrary spacing values unless required for platform-specific alignment.
+
+---
+
+# 18. BORDER RADIUS
+
+Use consistent radii:
+
+* Cards: **16px**
+* Buttons: **16px**
+* Inputs: **12px**
+* Small controls: appropriately smaller radius
+
+Avoid mixing unrelated corner-radius values.
+
+---
+
+# 19. TYPOGRAPHY
+
+Use one consistent font family throughout the application.
+
+Suggested hierarchy:
+
+### Main heading
+
+* 28px
+* Weight 600
+
+### Section heading
+
+* 20px
+* Weight 600
+
+### Body
+
+* 16px
+* Weight 400
+
+### Caption/helper
+
+* 14px
+* Weight 400
+
+### Error
+
+* 14px
+
+Typography must support dynamic font scaling.
+
+Avoid excessive font sizes and weights.
+
+---
+
+# 20. BUTTON SYSTEM
+
+Create/reuse shared button components.
+
+## Primary Button
+
+* Minimum height: 48px
+* Full width where appropriate
+* Teal background
+* White text
+* 16px radius
+* Weight 600
+* Subtle elevation
+* Pressed state
+* Disabled state
+* Loading state
+
+## Secondary Button
+
+* Minimum height: 48px
+* Outlined
+* Teal/neutral border
+* Appropriate contrast
+* Same radius and typography
+
+## Destructive / Logout
+
+Use a restrained destructive treatment.
+
+Do not make Logout visually more prominent than important account actions.
+
+---
+
+# 21. INPUT SYSTEM
+
+Create/reuse a shared input component supporting:
+
+* Persistent visible label
+* Input value
+* Focus state
+* Error state
+* Disabled state
+* Helper text
+* Accessibility label
+* Dynamic font scaling
+* Correct keyboard configuration
+* Password visibility control
+
+## Focus
+
+Use a clear teal focus indicator.
+
+## Error
+
+Use coral/red appropriately for:
+
+* Border
+* Error icon where useful
+* Error message
+
+Never communicate errors through color alone.
+
+---
+
+# 22. HOME DASHBOARD
+
+Apply the same design system to the existing Home dashboard.
+
+Do NOT unnecessarily rebuild the dashboard.
+
+Preserve all existing functionality while standardizing:
+
+* Colors
+* Typography
+* Spacing
+* Cards
+* Buttons
+* Navigation
+* Icons
+* Border radius
+* Shadows/elevation
+* Empty states
+* Error states
+
+## Personalized Header
+
+The Home dashboard should have a polished personalized header.
+
+Example:
+
+**Good morning, Asad 👋**
+
+Supporting text can be something subtle such as:
+
+**"Here's what's happening today."**
+
+Use the actual authenticated user's name dynamically.
+
+The greeting must update based on the user's local time.
+
+If the name is unavailable:
+
+**Good morning 👋**
+
+Do not display undefined/null/empty values.
+
+## Profile Access
+
+Add a professional profile/avatar button to the Home dashboard so users can quickly access:
+
+**Home → Profile**
+
+If the user has a profile photo, display it.
+
+If not, show a clean fallback avatar using their initials or an appropriate default avatar.
+
+---
+
+# 23. PROFILE NAVIGATION
+
+Ensure users can easily move between:
+
+**Home ↔ Profile**
+
+Use the existing navigation architecture if one already exists.
+
+If the app uses:
+
+* Bottom tabs → use an appropriate Profile tab if suitable.
+* Drawer → include Profile there.
+* Header navigation → use a professional avatar/profile button.
+
+Do not introduce a completely new navigation pattern if the existing architecture already provides one.
+
+---
+
+# 24. MICRO-INTERACTIONS
+
+Add subtle professional interactions:
+
+* Button press feedback.
+* Input focus transitions.
+* Toggle transitions.
+* Screen transitions.
+* Loading animations.
+* Success feedback.
+* Profile image transition where appropriate.
+* Smooth personalized greeting update.
+
+Use approximately:
+
+**200–300ms**
+
+for standard transitions.
+
+Animations should feel subtle rather than flashy.
+
+Respect reduced-motion preferences where supported.
+
+---
+
+# 25. RESPONSIVE DESIGN
+
+Ensure all screens work across:
+
+* Small phones
+* Large phones
+* Different aspect ratios
+* Landscape where applicable
+* Large system font sizes
+
+The keyboard must not cover important fields or buttons.
+
+Use appropriate scrolling behavior when the keyboard opens.
+
+---
+
+# 26. AUTHENTICATION STATE & SECURITY
+
+Ensure:
+
+* Authentication state is correctly persisted.
+* Authenticated users go directly to Home.
+* Unauthenticated users cannot access protected screens.
+* Logout clears authentication state.
+* Login errors are handled safely.
+* Passwords are never logged.
+* Sensitive information is not exposed in error messages.
+* Loading states prevent duplicate requests.
+* Navigation responds correctly to authentication changes.
+
+---
+
+# 27. DATA SYNCHRONIZATION
+
+The user's profile information should have a **single reliable source of truth**.
+
+Use the existing authentication/database architecture.
+
+The following should remain synchronized:
+
+**Authentication/Profile Data**
+↓
+**Profile Screen**
+↓
+**Home Greeting**
+↓
+**Avatar/Profile Components**
+
+If the user changes:
+
+* Name → Home greeting updates.
+* Profile photo → Avatar updates throughout the app.
+* Relevant preferences → UI updates without requiring logout/login where possible.
+
+Avoid duplicating user profile data unnecessarily in multiple unrelated state stores.
+
+---
+
+# 28. CODE ARCHITECTURE
+
+Use reusable components and centralized design tokens.
+
+Prefer shared components such as:
+
+* `AuthHeader`
+* `AuthInput`
+* `PrimaryButton`
+* `SecondaryButton`
+* `ErrorBanner`
+* `ProfileHeader`
+* `ProfileAvatar`
+* `SettingsRow`
+* `SettingsSection`
+* `VoiceGuidedToggle`
+* `Checkbox`
+* `ThemeProvider`
+* `PersonalizedGreeting`
+* Shared typography/theme tokens
+
+Centralize:
+
+* Colors
+* Typography
+* Spacing
+* Border radius
+* Shadows/elevation
+* Button dimensions
+* Input styles
+
+Do not scatter hardcoded styling values throughout individual screens.
+
+---
+
+# 29. FINAL QUALITY CHECK
+
+Before considering implementation complete, verify:
+
+## Authentication
+
+* Login works.
+* Registration works.
+* Forgot password works.
+* Google authentication works if configured.
+* Validation works.
+* Loading states work.
+* Error states work.
+* Authentication persists correctly.
+* Logout works.
+* Protected routes work correctly.
+
+## Personalization
+
+* User's name is retrieved from the actual authenticated profile.
+* Home greeting is dynamic.
+* Morning/afternoon/evening changes according to local time.
+* Name is never hardcoded.
+* Missing names have a graceful fallback.
+* No undefined/null/empty greetings appear.
+* Profile name changes update the Home greeting.
+* Profile photo changes update avatars throughout the app.
+
+## Profile
+
+* Profile screen works.
+* Profile information displays correctly.
+* Edit Profile works.
+* Profile photo functionality works if supported.
+* Change Password works.
+* Settings work.
+* Accessibility settings work.
+* Notification settings work if supported.
+* Appearance settings work if supported.
+* Terms & Privacy are accessible.
+* About section works.
+* Logout works.
+
+## Accessibility
+
+* All tap targets are at least 44×44pt.
+* Labels are always visible.
+* Dynamic font scaling works.
+* Screen readers have meaningful labels.
+* Contrast meets WCAG AA.
+* Errors do not rely only on color.
+* Voice-guided login works correctly.
+* Reduced-motion preferences are respected where supported.
+
+## Design
+
+* Login matches Registration.
+* Registration matches Forgot Password.
+* Forgot Password matches Profile.
+* Profile matches Home.
+* Home matches Adaptive AI branding.
+* Colors are consistent.
+* Typography is consistent.
+* Spacing is consistent.
+* Border radii are consistent.
+* Buttons are consistent.
+* Inputs are consistent.
+* Cards are consistent.
+* Navigation is consistent.
+
+## Technical Quality
+
+* No unnecessary rewrites.
+* No duplicated components.
+* No duplicated theme values.
+* No fake backend functionality.
+* No obvious runtime errors.
+* No obvious console warnings.
+* Existing functionality remains intact.
+
+---
+
+# MOST IMPORTANT PRODUCT GOAL
+
+The final result should feel like a **single polished Adaptive AI ecosystem**.
+
+The complete user journey should feel seamless:
+
+**Login → Home → Profile → Settings → Accessibility → Edit Profile → Home**
+
+and:
+
+**Login → Forgot Password → Confirmation → Login**
+
+and:
+
+**Login → Registration → Home**
+
+The Home dashboard should feel genuinely personalized:
+
+**"Good morning, Asad 👋"**
+
+rather than simply:
+
+**"Good morning"**
+
+when the user's name is available.
+
+The personalization must come from real authenticated profile data, not hardcoded values.
+
+The product identity should communicate:
+
+**AI + Adaptability + Accessibility + Personalization + Professionalism**
+
+Prioritize:
+
+**Clean + Modern + Trustworthy + Accessible + Intelligent + Personalized**
+
+Avoid:
+
+* Excessive gradients
+* Excessive glassmorphism
+* Too many colors
+* Excessive shadows
+* Decorative coral
+* Generic template-like UI
+* Overly futuristic effects
+* Inconsistent spacing
+* Inconsistent typography
+* Inconsistent buttons or inputs
+* Hardcoded user information
+
+Do not merely make the screens functional.
+
+Make the entire Adaptive AI app feel **production-ready, cohesive, accessible, modern, trustworthy, intelligent, and professionally designed.**

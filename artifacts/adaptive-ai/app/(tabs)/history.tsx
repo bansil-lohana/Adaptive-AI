@@ -1,0 +1,11 @@
+import React from 'react';
+import { Alert, FlatList, Text, View } from 'react-native';
+import { Feather } from '@expo/vector-icons';
+import { useColors } from '@/hooks/useColors';
+import { usePreferences } from '@/context/PreferencesContext';
+import { Button, Card, Screen } from '@/components/UI';
+export default function History() {
+  const colors = useColors(); const { history, clearHistory } = usePreferences();
+  return <Screen title="History" subtitle="Your recent moments with Adaptive AI."><FlatList data={history} keyExtractor={item => item.id} contentContainerStyle={{ paddingBottom: 110 }} ListEmptyComponent={<View style={{ alignItems: 'center', paddingTop: 90 }}><Feather name="clock" size={30} color={colors.mutedForeground} /><Text style={{ color: colors.foreground, fontWeight: '700', fontSize: 18, marginTop: 14 }}>Nothing here yet</Text><Text style={{ color: colors.mutedForeground, marginTop: 6, textAlign: 'center' }}>Your conversations and scans will be saved here.</Text></View>} renderItem={({ item }) => <Card style={{ flexDirection: 'row', alignItems: 'flex-start', padding: 15 }}><View style={{ width: 38, height: 38, borderRadius: 13, backgroundColor: colors.secondary, alignItems: 'center', justifyContent: 'center' }}><Feather name={item.type === 'Camera' ? 'camera' : item.type === 'Voice' ? 'mic' : 'message-circle'} size={18} color={colors.primary} /></View><View style={{ marginLeft: 12, flex: 1 }}><Text style={{ color: colors.foreground, fontWeight: '700' }}>{item.title}</Text><Text style={{ color: colors.mutedForeground, fontSize: 12, marginTop: 4 }}>{item.type} · {item.timestamp}</Text><Text numberOfLines={2} style={{ color: colors.foreground, lineHeight: 19, marginTop: 9 }}>{item.preview}</Text></View></Card>} ListHeaderComponent={history.length > 0 ? <Button label="Clear all history" icon="trash-2" secondary onPress={() => Alert.alert('Clear history?', 'This removes saved interactions from this device.', [{ text: 'Cancel', style: 'cancel' }, { text: 'Clear all', style: 'destructive', onPress: clearHistory }])} /> : null} />
+  </Screen>;
+}

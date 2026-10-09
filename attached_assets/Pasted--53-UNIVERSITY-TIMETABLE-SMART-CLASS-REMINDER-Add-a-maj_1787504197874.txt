@@ -1,0 +1,885 @@
+# 53. UNIVERSITY TIMETABLE & SMART CLASS REMINDER
+
+Add a major feature called **Smart Schedule**.
+
+The purpose of this feature is to help university students remember:
+
+* Which class is coming next
+* What subject they have
+* What time the class starts
+* What time it ends
+* Which room/location the class is in
+* Which teacher is teaching it, if available
+
+The student should be able to upload a timetable image and have Adaptive AI convert it into a structured class schedule.
+
+This feature must integrate naturally with the existing Adaptive AI and HCI concepts.
+
+---
+
+# 54. SMART SCHEDULE NAVIGATION
+
+Add a **Schedule** section to the application.
+
+The main navigation should become:
+
+```text
+Home | Schedule | Camera | Assistant | History | Settings
+```
+
+If six bottom-navigation items become visually crowded on small phones, use an alternative navigation structure such as:
+
+```text
+Home | Schedule | Assistant | Settings
+```
+
+and provide Camera/History through Home or secondary navigation.
+
+Prioritize usability over forcing too many icons into the bottom navigation.
+
+---
+
+# 55. SCHEDULE HOME SCREEN
+
+Create a dedicated **My Schedule** screen.
+
+Header:
+
+**My Schedule**
+
+Subtitle:
+
+"Never miss your next class."
+
+Display:
+
+### Next Class
+
+A prominent card showing:
+
+**Next Class**
+
+Subject:
+"Software Engineering"
+
+Time:
+"10:00 AM – 11:00 AM"
+
+Location:
+"Room SE-12"
+
+Teacher:
+"Dr. Ahmed"
+
+Countdown:
+
+"Starts in 32 minutes"
+
+Provide:
+
+**View Details**
+
+---
+
+# 56. TODAY'S CLASSES
+
+Below the Next Class card, display:
+
+**Today's Classes**
+
+Each class should show:
+
+* Subject
+* Start time
+* End time
+* Room
+* Teacher if available
+* Class status
+
+Possible statuses:
+
+* Upcoming
+* Starting Soon
+* In Progress
+* Completed
+
+Use visual hierarchy rather than relying only on colors.
+
+Example:
+
+```text
+10:00 AM
+Software Engineering
+Room SE-12
+Starts in 32 min
+
+12:00 PM
+Database Systems
+Room DB-04
+Starts in 2 hr 32 min
+
+2:00 PM
+Computer Networks
+Room CN-02
+Starts in 4 hr 32 min
+```
+
+---
+
+# 57. WEEKLY TIMETABLE
+
+Provide a weekly schedule view.
+
+Days:
+
+* Monday
+* Tuesday
+* Wednesday
+* Thursday
+* Friday
+* Saturday
+* Sunday
+
+Allow the user to switch between:
+
+### Today
+
+and
+
+### Week
+
+The Week view should visually represent:
+
+* Subject
+* Time
+* Room
+
+Use a clean timetable/grid design.
+
+The layout must remain usable on small Android screens.
+
+Allow horizontal scrolling if necessary.
+
+---
+
+# 58. UPLOAD TIMETABLE
+
+Add a prominent action:
+
+**Import Timetable**
+
+Allow the user to:
+
+* Take a photo
+* Select image from gallery
+
+Example:
+
+```text
+Import Timetable
+
+[ Take Photo ]
+
+[ Choose from Gallery ]
+```
+
+Explain:
+
+"Upload your university timetable and Adaptive AI will organize your classes automatically."
+
+---
+
+# 59. TIMETABLE IMAGE PROCESSING
+
+After selecting the timetable:
+
+Display:
+
+**Analyzing timetable...**
+
+Progress states:
+
+1. Reading timetable
+2. Detecting subjects
+3. Detecting days and times
+4. Detecting rooms
+5. Preparing your schedule
+
+For the frontend prototype, use mock processing.
+
+The backend will later perform the actual OCR/table extraction.
+
+---
+
+# 60. TIMETABLE API CONTRACT
+
+Prepare the frontend for a future FastAPI endpoint:
+
+```text
+POST /api/schedule/parse
+```
+
+The frontend should send:
+
+```text
+multipart/form-data
+image
+```
+
+The backend will eventually return structured timetable data.
+
+Expected response structure:
+
+```json
+{
+  "classes": [
+    {
+      "subject": "Software Engineering",
+      "day": "Monday",
+      "start_time": "10:00",
+      "end_time": "11:00",
+      "room": "SE-12",
+      "teacher": "Dr. Ahmed"
+    }
+  ]
+}
+```
+
+Do not implement the backend.
+
+Create a typed frontend interface for this response.
+
+---
+
+# 61. TIMETABLE REVIEW SCREEN
+
+IMPORTANT:
+
+Never automatically save OCR results without user confirmation.
+
+After timetable processing, show:
+
+**Review Your Timetable**
+
+Display every detected class.
+
+Example:
+
+```text
+Monday
+
+Software Engineering
+10:00 AM – 11:00 AM
+Room SE-12
+Dr. Ahmed
+
+Database Systems
+12:00 PM – 1:00 PM
+Room DB-04
+Dr. Ali
+```
+
+Allow the user to:
+
+* Edit
+* Delete
+* Add missing class
+* Confirm
+
+Display:
+
+**Some information may have been extracted incorrectly. Please review before saving.**
+
+---
+
+# 62. EDIT CLASS SCREEN
+
+Create an Add/Edit Class screen.
+
+Fields:
+
+### Subject
+
+Text input.
+
+### Day
+
+Dropdown/select.
+
+### Start Time
+
+Time picker.
+
+### End Time
+
+Time picker.
+
+### Room
+
+Text input.
+
+### Teacher
+
+Optional text input.
+
+### Reminder
+
+Select:
+
+* None
+* 5 minutes before
+* 10 minutes before
+* 15 minutes before
+* 30 minutes before
+* 1 hour before
+
+Button:
+
+**Save Class**
+
+---
+
+# 63. ADD CLASS MANUALLY
+
+Users must be able to add a class without uploading a timetable.
+
+Button:
+
+**+ Add Class**
+
+Use the same Add/Edit Class screen.
+
+This is important when OCR misses a class.
+
+---
+
+# 64. CLASS DETAILS
+
+When a user taps a class, show:
+
+**Software Engineering**
+
+Teacher:
+Dr. Ahmed
+
+Time:
+10:00 AM – 11:00 AM
+
+Location:
+Room SE-12
+
+Day:
+Monday
+
+Reminder:
+15 minutes before
+
+Actions:
+
+* Edit
+* Delete
+* Change Reminder
+
+---
+
+# 65. SMART NOTIFICATIONS
+
+Implement the frontend notification architecture using Expo-compatible local notification functionality.
+
+The app should schedule a local notification for each upcoming class.
+
+Example notification:
+
+**Upcoming Class**
+
+"Software Engineering starts in 15 minutes."
+
+Additional information:
+
+"Room SE-12"
+
+Another example:
+
+**Your next class is starting soon**
+
+"Database Systems"
+
+"12:00 PM • Room DB-04"
+
+---
+
+# 66. NOTIFICATION PERMISSION
+
+Do not request notification permission immediately on first launch.
+
+Explain first:
+
+**Stay on top of your classes**
+
+"Adaptive AI can remind you before each class starts."
+
+Buttons:
+
+* Enable Notifications
+* Maybe Later
+
+If permission is denied:
+
+Explain how the user can enable notifications from Android settings.
+
+The application must continue working without notifications.
+
+---
+
+# 67. NOTIFICATION SETTINGS
+
+Add a section in Settings:
+
+## Class Reminders
+
+Enable/disable:
+
+**Class Notifications**
+
+Reminder timing:
+
+* At class time
+* 5 minutes before
+* 10 minutes before
+* 15 minutes before
+* 30 minutes before
+* 1 hour before
+
+Allow the user to select a default reminder time.
+
+---
+
+# 68. SMART NEXT-CLASS CARD
+
+The Home screen should integrate with the schedule.
+
+Add:
+
+## Next Class
+
+Example:
+
+```text
+NEXT CLASS
+
+Software Engineering
+
+10:00 AM – 11:00 AM
+📍 Room SE-12
+
+Starts in 32 minutes
+```
+
+Button:
+
+**View Schedule**
+
+The card should automatically update based on the current time.
+
+If there is no upcoming class:
+
+**No more classes today 🎉**
+
+---
+
+# 69. CONTEXT-AWARE HOME ADAPTATION
+
+This feature should demonstrate contextual adaptation.
+
+For example:
+
+### More than 1 hour before class
+
+Show:
+
+"Next class at 2:00 PM"
+
+### 30 minutes before class
+
+Increase prominence of the Next Class card.
+
+Show:
+
+"Your class starts in 30 minutes."
+
+### 15 minutes before class
+
+Show:
+
+"Class starting soon"
+
+Make the class information highly visible.
+
+### During class
+
+Show:
+
+"Class in progress"
+
+### After the final class
+
+Show:
+
+"You're done for today 🎉"
+
+This should be subtle and useful rather than annoying.
+
+---
+
+# 70. LOCATION INFORMATION
+
+If a room/location is available, display it prominently.
+
+Example:
+
+📍 Room SE-12
+
+The frontend should treat the room as normal timetable data.
+
+Do not implement indoor navigation unless explicitly requested.
+
+---
+
+# 71. RECURRING CLASSES
+
+Classes should support recurring weekly schedules.
+
+Example:
+
+```text
+Monday
+10:00 AM – 11:00 AM
+Software Engineering
+
+Wednesday
+10:00 AM – 11:00 AM
+Software Engineering
+```
+
+The frontend should store the day/time pattern.
+
+Do not create thousands of individual class records.
+
+Represent recurring weekly classes as schedule rules.
+
+---
+
+# 72. SEMESTER MANAGEMENT
+
+Allow the user to define a timetable period.
+
+Example:
+
+**Fall 2026**
+
+The user can:
+
+* Create semester
+* Rename semester
+* Delete semester
+* Activate semester
+
+Only the active semester should generate reminders.
+
+---
+
+# 73. TIMETABLE MANAGEMENT
+
+On the Schedule screen provide:
+
+**Manage Timetable**
+
+Options:
+
+* Import timetable
+* Add class
+* Edit class
+* Delete class
+* Clear timetable
+* Replace timetable
+
+When replacing a timetable, ask for confirmation.
+
+---
+
+# 74. SMART REMINDER LOGIC
+
+The frontend should calculate the next upcoming class from the stored schedule.
+
+Consider:
+
+* Current day
+* Current time
+* Class start time
+* Class end time
+* Weekly recurrence
+* Active semester
+* Reminder preference
+
+Display:
+
+```text
+Next class:
+Subject
+Date
+Start time
+Room
+Time remaining
+```
+
+Do not rely only on static mock text.
+
+Use the device's current date/time for the prototype.
+
+---
+
+# 75. TIME FORMAT
+
+Respect the user's preferred time format.
+
+Support:
+
+* 12-hour format
+* 24-hour format
+
+Example:
+
+12-hour:
+
+"10:00 AM"
+
+24-hour:
+
+"10:00"
+
+---
+
+# 76. SCHEDULE EMPTY STATE
+
+If no timetable exists:
+
+Display:
+
+**Your schedule is empty**
+
+"Upload your university timetable and we'll organize your classes for you."
+
+Buttons:
+
+**Import Timetable**
+
+**Add Class Manually**
+
+---
+
+# 77. OCR ERROR HANDLING
+
+If timetable extraction fails:
+
+Display:
+
+"We couldn't read your timetable."
+
+Suggestions:
+
+* Use a clearer image
+* Make sure the entire timetable is visible
+* Try taking the photo again
+* Add classes manually
+
+Button:
+
+**Try Again**
+
+---
+
+# 78. PARTIAL OCR RESULTS
+
+If only some classes are detected:
+
+Display:
+
+"We found 8 classes. Please review the results before saving."
+
+Highlight uncertain information where the backend provides confidence.
+
+Allow the user to correct every field.
+
+---
+
+# 79. SCHEDULE ACCESS FROM ASSISTANT
+
+The AI Assistant frontend should be prepared for schedule-related queries.
+
+Examples:
+
+User:
+
+"When is my next class?"
+
+Response:
+
+"Your next class is Software Engineering at 10:00 AM in Room SE-12."
+
+User:
+
+"Where is my Database class?"
+
+Response:
+
+"Your Database Systems class is at 12:00 PM in Room DB-04."
+
+User:
+
+"What classes do I have today?"
+
+Response:
+
+"Today you have three classes..."
+
+For now, use local schedule data/mock responses.
+
+Later the FastAPI backend can receive schedule context.
+
+---
+
+# 80. ADAPTIVE SCHEDULE EXPERIENCE
+
+The Schedule feature should also adapt.
+
+If the user frequently checks today's schedule:
+
+Prioritize:
+
+**Today's Classes**
+
+If the user frequently checks upcoming classes:
+
+Prioritize:
+
+**Next Class**
+
+If the user has enabled Simplified Mode:
+
+Show only:
+
+* Next class
+* Today's classes
+* Add class
+
+If the user has enabled Large Text:
+
+Increase schedule typography.
+
+If notifications are disabled:
+
+Show a subtle reminder:
+
+"Class reminders are turned off."
+
+Button:
+
+**Enable Reminders**
+
+---
+
+# 81. NOTIFICATION UX
+
+Notifications should be useful and concise.
+
+Good:
+
+**Class starting soon**
+
+Software Engineering
+10:00 AM • Room SE-12
+
+Bad:
+
+"Your class is going to be happened at 10:00 AM."
+
+Use natural professional language.
+
+---
+
+# 82. FRONTEND DATA MODEL
+
+Add:
+
+```typescript
+interface ClassSchedule {
+  id: string;
+  subject: string;
+  dayOfWeek: number;
+  startTime: string;
+  endTime: string;
+  room?: string;
+  teacher?: string;
+  reminderMinutes: number;
+  semesterId: string;
+  enabled: boolean;
+}
+```
+
+Add:
+
+```typescript
+interface Semester {
+  id: string;
+  name: string;
+  isActive: boolean;
+}
+```
+
+---
+
+# 83. ACCEPTANCE CRITERIA FOR SMART SCHEDULE
+
+The feature is complete when:
+
+* User can import a timetable image.
+* User sees processing feedback.
+* Mock OCR produces structured classes.
+* User can review extracted classes.
+* User can edit extracted information.
+* User can delete incorrect classes.
+* User can add missing classes.
+* User can manually add classes.
+* User can save the timetable.
+* User can view today's schedule.
+* User can view the weekly schedule.
+* App calculates the next class.
+* Home displays the next class.
+* Reminder preferences can be changed.
+* Notification permission is handled correctly.
+* Local notifications can be scheduled for the prototype.
+* User can enable/disable reminders.
+* User can edit/delete classes.
+* Schedule data persists locally.
+* Simplified/accessibility modes affect the schedule UI.
+* Assistant can access local schedule data for prototype queries.
+
+---
+
+# 84. UPDATED PRODUCT CONCEPT
+
+Adaptive AI is now a multimodal adaptive HCI assistant with two major capabilities:
+
+### 1. AI Accessibility Assistant
+
+Camera + OCR + Voice + AI + TTS
+
+### 2. Smart University Assistant
+
+Timetable + Schedule + Context Awareness + Notifications
+
+The application should demonstrate:
+
+**"Understand the user, understand the context, and provide the right information at the right time."**
+
+The Smart Schedule feature should feel like an integral part of Adaptive AI rather than a separate unrelated timetable application.

@@ -1,0 +1,1 @@
+- [Adaptive AI build boundary](adaptive-ai-build.md) — frontend-only Expo client with replaceable mocks and preference-driven adaptive presentation.

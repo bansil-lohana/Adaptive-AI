@@ -1,0 +1,1640 @@
+# Adaptive AI — Android Frontend Development Specification
+
+## ROLE
+
+Act as a senior Google Android engineer, senior React Native engineer, senior UX/HCI engineer, and senior frontend architect.
+
+Build a polished, production-quality **Android mobile application frontend prototype** called **Adaptive AI**.
+
+This is the frontend/client application for an AI-powered adaptive HCI system.
+
+The backend will be developed separately using **FastAPI in Cursor**.
+
+Your responsibility in this task is ONLY the Android frontend/client.
+
+Do not build the backend server.
+
+Do not put AI API keys in the mobile application.
+
+Do not directly connect the app to Gemini, OpenAI, or other AI providers.
+
+Instead, create clean frontend service interfaces and mock implementations that can later be replaced with REST API calls to the FastAPI backend.
+
+---
+
+# 1. TECHNOLOGY STACK
+
+Use:
+
+* React Native
+* Expo
+* TypeScript
+* Expo Router
+* Functional React components
+* React Hooks
+* Context API or Zustand for global state
+* AsyncStorage for local persistence where appropriate
+* Expo Camera
+* Expo Image Picker
+* Expo Speech
+* Expo Audio where required
+* Expo Haptics where appropriate
+* React Native Safe Area Context
+* Material-style icons
+* Modern Android UI patterns
+
+Prefer Expo-compatible packages.
+
+Do NOT use Flutter.
+
+Do NOT use unnecessary dependencies.
+
+The project must be structured so it can run on an Android device/emulator using Expo.
+
+---
+
+# 2. IMPORTANT FRONTEND/BACKEND SEPARATION
+
+The backend will be developed separately.
+
+The frontend must communicate with the backend through REST APIs.
+
+Create an API abstraction such as:
+
+```text
+src/
+├── api/
+│   ├── client.ts
+│   ├── aiApi.ts
+│   ├── ocrApi.ts
+│   └── historyApi.ts
+```
+
+For now, implement mock services.
+
+Later these mock functions will be replaced with real FastAPI requests.
+
+Example:
+
+```typescript
+askQuestion(prompt)
+```
+
+should currently return a mock response.
+
+Later it will call:
+
+```text
+POST /api/chat
+```
+
+Similarly:
+
+```text
+analyzeImage()
+    ↓
+POST /api/analyze-image
+
+extractText()
+    ↓
+POST /api/ocr
+
+summarizeText()
+    ↓
+POST /api/summarize
+
+translateText()
+    ↓
+POST /api/translate
+```
+
+Do not hardcode backend URLs throughout the application.
+
+Create a single configurable API base URL.
+
+Example:
+
+```text
+EXPO_PUBLIC_API_URL
+```
+
+Use environment configuration.
+
+---
+
+# 3. CORE PRODUCT CONCEPT
+
+Adaptive AI is a multimodal AI assistant.
+
+The user can interact using:
+
+* Touch
+* Text
+* Voice
+* Camera
+
+The interface adapts based on:
+
+* User preferences
+* Accessibility settings
+* Preferred interaction method
+* Interaction behavior
+* Current context
+
+The key HCI principle is:
+
+> "The interface adapts to the user instead of forcing the user to adapt to the interface."
+
+The frontend must make this adaptation clearly visible.
+
+---
+
+# 4. APPLICATION STRUCTURE
+
+Create these main sections:
+
+1. Home
+2. Camera
+3. Assistant
+4. History
+5. Settings
+
+Use a modern bottom navigation bar.
+
+Primary navigation:
+
+```text
+Home | Camera | Assistant | History | Settings
+```
+
+Do not overcrowd the navigation bar.
+
+Use icons plus labels.
+
+The currently selected section must be visually obvious.
+
+---
+
+# 5. DESIGN LANGUAGE
+
+Create a professional modern Android UI.
+
+The application should look like a real AI product rather than a university demo.
+
+Design characteristics:
+
+* Clean
+* Minimal
+* Modern
+* Accessible
+* Friendly
+* Professional
+* High readability
+* Large touch targets
+* Clear hierarchy
+* Consistent spacing
+* Rounded cards
+* Subtle elevation
+* Material-style components
+
+Avoid:
+
+* Excessive gradients
+* Excessive animations
+* Tiny text
+* Tiny buttons
+* Overloaded screens
+* Unnecessary decorative elements
+
+Use a coherent design system throughout the application.
+
+---
+
+# 6. COLOR SYSTEM
+
+Create centralized theme tokens.
+
+Support:
+
+### Light Theme
+
+Use a clean light background with strong readable text.
+
+### Dark Theme
+
+Use a dark background with accessible contrast.
+
+### High Contrast Theme
+
+Increase contrast between:
+
+* Background
+* Text
+* Buttons
+* Cards
+* Borders
+* Interactive elements
+
+Do not scatter color values throughout components.
+
+Create centralized theme configuration.
+
+---
+
+# 7. TYPOGRAPHY
+
+Create centralized typography.
+
+Support:
+
+* Small
+* Normal
+* Large
+* Extra Large
+
+The user's selected text size must affect the entire application.
+
+Avoid hardcoded font sizes where possible.
+
+Ensure text remains readable when Extra Large is enabled.
+
+---
+
+# 8. ONBOARDING
+
+Create a professional first-launch onboarding experience.
+
+## Screen 1 — Welcome
+
+Display:
+
+**Meet Adaptive AI**
+
+Subtitle:
+
+"An intelligent assistant that adapts to the way you interact."
+
+Buttons:
+
+* Get Started
+* Skip
+
+Use an attractive but simple illustration/icon treatment.
+
+---
+
+## Screen 2 — Interaction Preferences
+
+Title:
+
+"How do you prefer to interact?"
+
+Options:
+
+* Touch
+* Voice
+* Camera
+* Text
+* Automatic
+
+Allow multiple selections.
+
+Highlight selected options clearly.
+
+---
+
+## Screen 3 — Accessibility
+
+Title:
+
+"Make Adaptive AI work for you"
+
+Options:
+
+* Larger text
+* High contrast
+* Reduce motion
+* Larger buttons
+* Voice feedback
+* Simplified interface
+
+---
+
+## Screen 4 — Permissions
+
+Explain permissions before requesting them.
+
+Camera:
+
+"We use your camera to read and understand images."
+
+Microphone:
+
+"We use your microphone for voice interaction."
+
+Speech recognition:
+
+"We use speech recognition to understand your voice."
+
+Buttons:
+
+* Continue
+* Skip for now
+
+Optional permissions must not prevent the user from exploring the rest of the app.
+
+Store onboarding completion locally.
+
+---
+
+# 9. HOME SCREEN
+
+Create the main adaptive dashboard.
+
+Header:
+
+"Good evening"
+
+Subtitle:
+
+"How can I help you?"
+
+Add a small profile/settings icon if appropriate.
+
+---
+
+## Main AI Card
+
+Large card:
+
+**Ask Adaptive AI**
+
+Subtitle:
+
+"Choose how you want to interact."
+
+Three primary actions:
+
+### Voice
+
+🎤
+
+"Ask by Voice"
+
+### Camera
+
+📷
+
+"Ask with Camera"
+
+### Text
+
+⌨
+
+"Ask by Text"
+
+These must be large, accessible touch targets.
+
+---
+
+# 10. QUICK ACTIONS
+
+Add:
+
+**Quick Actions**
+
+Cards:
+
+* Read Text
+* Explain Image
+* Summarize
+* Translate
+* Simplify Text
+
+Each action should navigate to the appropriate workflow.
+
+Do not make them purely decorative.
+
+---
+
+# 11. RECENT ACTIVITY
+
+Display:
+
+**Recent Activity**
+
+Each item should contain:
+
+* Interaction icon
+* Short title
+* Interaction type
+* Timestamp
+
+Examples:
+
+"Explained image"
+
+"Summarized lecture notes"
+
+"Voice question"
+
+"Translated text"
+
+Allow tapping an item to open the corresponding history detail.
+
+If there is no history, show a professional empty state:
+
+"No activity yet"
+
+"Your recent AI interactions will appear here."
+
+---
+
+# 12. ADAPTIVE HOME SCREEN
+
+The Home screen must change based on the selected interaction mode.
+
+## Standard Mode
+
+Show:
+
+* Voice
+* Camera
+* Text
+
+with equal prominence.
+
+## Voice-First Mode
+
+Make the microphone interaction the dominant action.
+
+Show a large microphone button.
+
+Reduce unnecessary typing actions.
+
+Display:
+
+"Tap and speak"
+
+## Camera-First Mode
+
+Make Camera the dominant action.
+
+Display:
+
+"Point your camera at text or an object."
+
+## Simplified Mode
+
+Reduce:
+
+* Secondary actions
+* Visual density
+* Number of cards
+
+Increase:
+
+* Button size
+* Text size
+* Spacing
+
+## Accessibility Mode
+
+Increase:
+
+* Text size
+* Button size
+* Contrast
+* Focus indicators
+
+---
+
+# 13. CAMERA SCREEN
+
+Create a real Android camera interface using Expo-compatible camera functionality.
+
+The screen should include:
+
+* Camera preview
+* Capture button
+* Flash control
+* Front/back camera switch
+* Gallery button
+* Back button
+
+Use proper Android safe areas.
+
+The capture button must be large.
+
+---
+
+# 14. CAMERA PERMISSION FLOW
+
+Before using the camera:
+
+Explain:
+
+"Adaptive AI needs camera access to read and understand images."
+
+Buttons:
+
+* Allow Camera
+* Not Now
+
+If permission is denied:
+
+Display:
+
+"Camera access is required for this feature."
+
+Buttons:
+
+* Try Again
+* Open Settings
+* Cancel
+
+Never crash because of denied permissions.
+
+---
+
+# 15. IMAGE PREVIEW
+
+After capturing an image:
+
+Show a preview.
+
+Actions:
+
+* Retake
+* Use Image
+* Cancel
+
+After "Use Image":
+
+Display:
+
+"Analyzing image..."
+
+This processing state can initially use a mock delay.
+
+Then display an OCR result screen.
+
+---
+
+# 16. OCR RESULT SCREEN
+
+Display:
+
+**Detected Text**
+
+Show realistic mock OCR content during frontend development.
+
+Example:
+
+"Artificial intelligence is the simulation of human intelligence by machines."
+
+Show:
+
+* Extracted text
+* Copy button
+* Read Aloud
+* Explain
+* Summarize
+* Translate
+* Ask AI
+
+The UI must be designed so the actual OCR result can later come from:
+
+```text
+POST /api/ocr
+```
+
+Do not implement the actual OCR backend.
+
+---
+
+# 17. AI ASSISTANT SCREEN
+
+Create a modern conversational AI interface.
+
+Components:
+
+* Conversation list
+* User message bubble
+* AI message bubble
+* Text input
+* Send button
+* Microphone button
+* Camera attachment button
+* Speaker button on AI messages
+* Clear conversation
+
+Use appropriate keyboard handling.
+
+The input area must remain accessible when the keyboard opens.
+
+---
+
+# 18. CHAT STATES
+
+Implement:
+
+### Empty
+
+"How can I help you?"
+
+### User typing
+
+Normal input state.
+
+### Sending
+
+Show:
+
+"Thinking..."
+
+### AI response
+
+Display response.
+
+### Error
+
+Display:
+
+"Something went wrong. Please try again."
+
+Include retry.
+
+---
+
+# 19. MOCK AI SERVICE
+
+Create:
+
+```text
+src/services/aiService.ts
+```
+
+Implement:
+
+```typescript
+askQuestion()
+explainText()
+summarizeText()
+simplifyText()
+translateText()
+analyzeImage()
+```
+
+Use realistic mock responses.
+
+Example:
+
+User:
+
+"Explain convolutional neural networks."
+
+Mock response:
+
+"A convolutional neural network, or CNN, is a type of neural network commonly used for images. It learns patterns such as edges, shapes, and objects from visual data."
+
+Make the service easily replaceable by the real backend.
+
+---
+
+# 20. VOICE INPUT UI
+
+Implement the frontend voice interaction.
+
+Use Expo-compatible speech recognition/audio libraries where practical.
+
+If actual speech recognition cannot be implemented in the current environment, create a realistic mock interaction while keeping the interface and service abstraction ready for the backend.
+
+Flow:
+
+```text
+Tap microphone
+      ↓
+Listening
+      ↓
+Voice waveform
+      ↓
+Recognized text
+      ↓
+Edit text
+      ↓
+Send
+```
+
+States:
+
+* Ready
+* Listening
+* Processing
+* Success
+* Error
+
+---
+
+# 21. TEXT-TO-SPEECH
+
+Use Expo-compatible TTS functionality.
+
+Every AI response should have:
+
+* Speaker button
+* Play
+* Stop
+
+When voice feedback is enabled:
+
+Automatically read important AI responses.
+
+Respect the user's speech-speed preference.
+
+---
+
+# 22. ADAPTIVE UI ENGINE
+
+Create:
+
+```text
+src/adaptive/
+    adaptiveUIController.ts
+    adaptiveRules.ts
+```
+
+The adaptive system should manage:
+
+* Interaction mode
+* Text scale
+* Button size
+* Contrast
+* Simplification
+* Voice prominence
+* Camera prominence
+* Animation level
+
+Do not hardcode adaptive behavior inside individual screens.
+
+Centralize the rules.
+
+---
+
+# 23. ADAPTIVE RULES
+
+Implement rules such as:
+
+```text
+IF preferredMode = voice
+THEN increase voice action prominence
+
+IF preferredMode = camera
+THEN increase camera action prominence
+
+IF simplifiedMode = true
+THEN hide secondary actions
+
+IF largeText = true
+THEN increase typography scale
+
+IF largeButtons = true
+THEN increase button height
+
+IF highContrast = true
+THEN apply high contrast theme
+
+IF reduceMotion = true
+THEN reduce/disable non-essential animations
+
+IF voiceFeedback = true
+THEN enable automatic TTS where appropriate
+```
+
+---
+
+# 24. USER OVERRIDE
+
+Adaptive behavior must never remove user control.
+
+Provide an option:
+
+"Adaptive UI"
+
+Toggle:
+
+ON / OFF
+
+When OFF:
+
+The interface should remain in the user's manually selected configuration.
+
+When ON:
+
+The adaptive rules can modify presentation.
+
+---
+
+# 25. SETTINGS SCREEN
+
+Create a comprehensive settings screen.
+
+Sections:
+
+## Appearance
+
+* Light
+* Dark
+* System
+
+## Text Size
+
+* Small
+* Normal
+* Large
+* Extra Large
+
+## Accessibility
+
+* High Contrast
+* Larger Buttons
+* Reduce Motion
+* Simplified Interface
+
+## Voice
+
+* Voice Feedback
+* Auto-read AI Responses
+* Speech Speed
+
+## Interaction
+
+* Touch
+* Voice
+* Camera
+* Automatic
+
+## AI Response
+
+* Concise
+* Normal
+* Detailed
+
+## Explanation Style
+
+* Simple
+* Standard
+* Technical
+
+## Adaptive UI
+
+* Enable Adaptive UI
+
+---
+
+# 26. SETTINGS PERSISTENCE
+
+Store settings locally using AsyncStorage or an appropriate Expo-compatible solution.
+
+When the user changes a setting:
+
+* Update global state immediately.
+* Persist it.
+* Apply it across the application.
+
+When the application restarts:
+
+Restore saved preferences.
+
+---
+
+# 27. HISTORY SCREEN
+
+Create:
+
+**History**
+
+Show previous interactions.
+
+Each item:
+
+* Icon
+* Title
+* Type
+* Date/time
+* Short preview
+
+Categories:
+
+* Voice
+* Camera
+* Text
+
+Actions:
+
+* Open
+* Delete
+
+Add:
+
+"Clear All"
+
+with a confirmation dialog.
+
+---
+
+# 28. HISTORY DETAIL
+
+When an item is opened:
+
+Display:
+
+* User query
+* Image preview if available
+* Extracted text if available
+* AI response
+* Timestamp
+* Speaker button
+
+Allow the user to continue the conversation.
+
+---
+
+# 29. LOCAL DATA MODELS
+
+Create TypeScript models/interfaces for:
+
+```typescript
+UserPreferences
+ChatMessage
+OCRResult
+HistoryItem
+InteractionMode
+AdaptiveState
+```
+
+Keep these models separate from UI components.
+
+---
+
+# 30. API LAYER
+
+Create:
+
+```text
+src/api/
+    client.ts
+    aiApi.ts
+    ocrApi.ts
+    historyApi.ts
+```
+
+The API layer must be independent of screens.
+
+Example:
+
+```typescript
+aiApi.askQuestion()
+ocrApi.extractText()
+aiApi.summarizeText()
+aiApi.translateText()
+```
+
+For now these can use mock implementations.
+
+Add TODO comments showing where FastAPI endpoints will later be connected.
+
+---
+
+# 31. BACKEND CONTRACT
+
+Assume the future FastAPI backend will expose:
+
+```text
+POST /api/chat
+POST /api/analyze-image
+POST /api/ocr
+POST /api/summarize
+POST /api/explain
+POST /api/simplify
+POST /api/translate
+
+GET /api/health
+```
+
+Do not implement these backend endpoints.
+
+Only prepare the frontend API layer to consume them.
+
+Use typed request/response interfaces.
+
+---
+
+# 32. ERROR STATES
+
+Every important frontend feature must have:
+
+* Loading
+* Success
+* Empty
+* Error
+* Permission denied
+
+Examples:
+
+Camera:
+
+"Camera access is unavailable."
+
+OCR:
+
+"We couldn't detect readable text."
+
+AI:
+
+"The assistant is temporarily unavailable."
+
+Voice:
+
+"I couldn't understand that. Please try again."
+
+Network:
+
+"Unable to connect. Check your internet connection."
+
+Never display raw JavaScript errors to users.
+
+---
+
+# 33. OFFLINE UI
+
+If the backend cannot be reached:
+
+Display a friendly offline state.
+
+Example:
+
+"You're offline"
+
+"Some AI features require an internet connection."
+
+The rest of the application should remain navigable.
+
+---
+
+# 34. ACCESSIBILITY
+
+Follow Android accessibility principles.
+
+Ensure:
+
+* Accessible labels
+* Large touch targets
+* Good contrast
+* Screen-reader-friendly labels
+* Logical focus order
+* No information conveyed by color alone
+* Readable typography
+* Accessible icons
+
+Every icon-only button must have an accessibility label.
+
+---
+
+# 35. REDUCED MOTION
+
+When Reduce Motion is enabled:
+
+Disable or reduce:
+
+* Large transitions
+* Decorative animations
+* Repeated pulsing
+* Unnecessary motion
+
+Keep essential feedback.
+
+---
+
+# 36. RESPONSIVE DESIGN
+
+Support:
+
+* Small Android phones
+* Large Android phones
+* Android tablets
+
+Do not hardcode screen dimensions.
+
+Use:
+
+* Flexbox
+* Safe areas
+* ScrollView/FlatList
+* Responsive spacing
+* Responsive typography
+
+Ensure content does not overflow.
+
+---
+
+# 37. ANDROID BACK BUTTON
+
+Implement proper Android back navigation.
+
+Examples:
+
+Camera:
+
+Back → previous screen.
+
+Image Preview:
+
+Back → camera.
+
+OCR:
+
+Back → image preview.
+
+Assistant:
+
+Back → Home where appropriate.
+
+Onboarding:
+
+Do not accidentally exit the application.
+
+---
+
+# 38. PERFORMANCE
+
+The frontend should:
+
+* Avoid unnecessary re-renders
+* Use FlatList for long lists
+* Properly clean up camera resources
+* Properly clean up audio/TTS resources
+* Avoid memory leaks
+* Compress large images before upload
+* Avoid blocking the UI
+* Show loading feedback
+
+---
+
+# 39. PROJECT STRUCTURE
+
+Use a structure similar to:
+
+```text
+app/
+    _layout.tsx
+    index.tsx
+
+    onboarding/
+        welcome.tsx
+        interaction.tsx
+        accessibility.tsx
+        permissions.tsx
+
+    home/
+        index.tsx
+
+    camera/
+        index.tsx
+        preview.tsx
+        result.tsx
+
+    assistant/
+        index.tsx
+
+    history/
+        index.tsx
+        detail.tsx
+
+    settings/
+        index.tsx
+        privacy.tsx
+
+src/
+    components/
+    theme/
+    hooks/
+    context/
+    models/
+    api/
+    services/
+    adaptive/
+    storage/
+    utils/
+```
+
+Use Expo Router for navigation.
+
+---
+
+# 40. COMPONENT SYSTEM
+
+Create reusable components.
+
+Examples:
+
+```text
+AdaptiveButton
+PrimaryButton
+SecondaryButton
+InteractionCard
+QuickActionCard
+ChatBubble
+VoiceButton
+CameraButton
+AIMessage
+LoadingIndicator
+ErrorState
+EmptyState
+SettingRow
+SettingSwitch
+TextScalePreview
+AdaptiveBanner
+```
+
+Do not duplicate UI code across screens.
+
+---
+
+# 41. DEMO MODE
+
+Create a frontend Demo Mode.
+
+The user should be able to demonstrate the application without a backend.
+
+Demo Mode should simulate:
+
+### Camera
+
+Capture/select an image.
+
+↓
+
+"Analyzing image..."
+
+↓
+
+Show mock OCR result.
+
+### AI
+
+User asks:
+
+"Explain this text."
+
+↓
+
+Show realistic AI response.
+
+### Voice
+
+Tap microphone.
+
+↓
+
+Show:
+
+"Listening..."
+
+↓
+
+Show mock recognized text.
+
+↓
+
+Show AI response.
+
+### TTS
+
+Tap speaker.
+
+↓
+
+Read the response aloud using device TTS.
+
+Clearly indicate:
+
+"Demo Mode"
+
+Do not make the demo feel fake or unfinished.
+
+---
+
+# 42. DEMO SCENARIO
+
+Make this complete frontend flow work:
+
+```text
+Home
+ ↓
+Ask with Camera
+ ↓
+Camera
+ ↓
+Capture Image
+ ↓
+Preview
+ ↓
+Use Image
+ ↓
+Analyzing...
+ ↓
+Detected Text
+ ↓
+Explain
+ ↓
+Thinking...
+ ↓
+AI Response
+ ↓
+Speaker
+ ↓
+TTS
+ ↓
+Save to History
+```
+
+Use mock services until the backend is connected.
+
+---
+
+# 43. SECOND DEMO FLOW
+
+```text
+Home
+ ↓
+Ask by Voice
+ ↓
+Listening...
+ ↓
+Recognized Text
+ ↓
+Edit
+ ↓
+Send
+ ↓
+Thinking...
+ ↓
+AI Response
+ ↓
+TTS
+ ↓
+History
+```
+
+---
+
+# 44. ADAPTIVE HCI DEMO
+
+The most important demonstration should be:
+
+```text
+Settings
+ ↓
+Enable Simplified Interface
+ ↓
+Return Home
+ ↓
+UI changes
+ ↓
+Larger buttons
+ ↓
+Fewer secondary actions
+ ↓
+Simpler layout
+```
+
+Then:
+
+```text
+Settings
+ ↓
+Select Voice-First
+ ↓
+Return Home
+ ↓
+Large microphone action becomes dominant
+ ↓
+Voice interaction becomes the primary workflow
+```
+
+Show:
+
+"Interface adapted to your preferences."
+
+Use a subtle Snackbar/banner.
+
+---
+
+# 45. PRIVACY UI
+
+Create a Privacy section.
+
+Explain clearly:
+
+### Camera
+
+"Camera access is used to capture images for analysis."
+
+### Microphone
+
+"Microphone access is used for voice interaction."
+
+### AI Processing
+
+"Some AI features may send information to the application server for processing."
+
+### Local History
+
+"Your recent interactions may be stored locally on this device."
+
+Provide:
+
+* Clear History
+* Delete Local Data
+
+Do not claim data is private or local if it is actually sent to a future backend.
+
+---
+
+# 46. SECURITY
+
+The frontend must never contain:
+
+* Gemini API keys
+* OpenAI API keys
+* Database passwords
+* Backend secrets
+
+The only configurable backend value should be the API base URL.
+
+Use environment variables.
+
+---
+
+# 47. HCI PRINCIPLES
+
+The frontend must visibly demonstrate:
+
+### Visibility
+
+Show what the system is doing.
+
+### Feedback
+
+Give feedback after interactions.
+
+### Consistency
+
+Use consistent controls.
+
+### Error Prevention
+
+Prevent invalid actions.
+
+### Accessibility
+
+Support different user needs.
+
+### User Control
+
+Allow users to override adaptive behavior.
+
+### Recognition over Recall
+
+Use clear labels.
+
+### Flexibility
+
+Support multiple interaction methods.
+
+### Adaptability
+
+Change UI according to user preferences/context.
+
+---
+
+# 48. FINAL QUALITY REQUIREMENTS
+
+The application should feel like a polished real-world Android application.
+
+Do not use:
+
+* Lorem ipsum
+* "Button 1"
+* "Test"
+* "Sample Screen"
+* Unfinished placeholder layouts
+
+Use realistic content and microcopy.
+
+Make every important interaction visually polished.
+
+---
+
+# 49. IMPLEMENTATION PRIORITY
+
+Build in this exact order:
+
+1. Expo project setup
+2. Theme/design system
+3. Navigation
+4. Reusable components
+5. Onboarding
+6. Global preferences state
+7. Home
+8. Adaptive UI engine
+9. Settings
+10. Assistant
+11. Camera
+12. Image preview
+13. OCR result UI
+14. Voice interaction UI
+15. TTS
+16. History
+17. Demo Mode
+18. API abstraction
+19. Error states
+20. Accessibility
+21. Android back navigation
+22. Responsive design
+23. Final UI polish
+
+---
+
+# 50. IMPORTANT DEVELOPMENT RULES
+
+Do not attempt to build the backend.
+
+Do not add API keys.
+
+Do not create database infrastructure.
+
+Do not tightly couple screens to backend implementation.
+
+Do not put API calls directly inside UI components.
+
+Do not duplicate business logic.
+
+Keep the frontend ready to connect to a FastAPI backend.
+
+If a feature requires a backend, create:
+
+1. A typed API interface.
+2. A mock implementation.
+3. A clean loading state.
+4. A clean success state.
+5. A clean error state.
+
+---
+
+# 51. ACCEPTANCE CRITERIA
+
+The frontend is considered complete when:
+
+* The Expo application starts successfully.
+* Android navigation works.
+* Onboarding works.
+* Preferences persist.
+* Home adapts to preferences.
+* Camera screen works or has a functional demo fallback.
+* Image preview works.
+* OCR result screen works using mock data.
+* Assistant works using mock AI data.
+* Voice interaction UI works.
+* Device TTS works.
+* History works locally.
+* Settings work.
+* Dark mode works.
+* High contrast works.
+* Large text works.
+* Simplified mode works.
+* Voice-first mode works.
+* Camera-first mode works.
+* Error states work.
+* Loading states work.
+* Android back navigation works.
+* No secret keys are included.
+* API layer is ready for FastAPI integration.
+* The UI is responsive on different Android screen sizes.
+
+---
+
+# 52. FINAL INSTRUCTION
+
+Do not simply generate static screens.
+
+Build a **functional Android frontend prototype** with real navigation, state management, local persistence, adaptive UI behavior, camera interaction, TTS, realistic mock AI/OCR workflows, accessibility controls, and a clean API abstraction.
+
+The backend will be implemented separately in FastAPI using Cursor.
+
+The final frontend should demonstrate the concept:
+
+**Multimodal Interaction + AI + Adaptive HCI + Accessibility**
+
+The application should feel like a coherent product from onboarding to final interaction, not a collection of unrelated screens.

@@ -1,0 +1,557 @@
+Act as a senior mobile product designer and senior React Native/Expo engineer.
+
+I want you to redesign and professionally refine the EXISTING Camera screen of my Adaptive AI Android app.
+
+IMPORTANT:
+- Do NOT redesign the entire application.
+- Do NOT change the existing Home, Schedule, AI, or History screens.
+- Do NOT break any existing functionality.
+- Preserve the current Adaptive AI branding, colors, typography, navigation architecture, and overall design language.
+- Modify ONLY the Camera / Live AI experience.
+- The purpose of this screen is NOT taking a normal photograph.
+- The purpose is REAL-TIME AI ANALYSIS while the user is recording video.
+- The user points the camera toward a question, textbook, notes, mathematical problem, programming problem, diagram, or other study material.
+- Adaptive AI continuously analyzes what is visible and provides useful answers/explanations while the user is recording.
+
+CORE PRODUCT CONCEPT:
+"Point your camera at a problem and let Adaptive AI understand what you're seeing in real time."
+
+The camera screen should therefore feel like:
+LIVE AI ASSISTANCE
+rather than:
+NORMAL CAMERA / PHOTO CAPTURE.
+
+--------------------------------------------------
+1. REMOVE THE NORMAL BOTTOM NAVIGATION
+--------------------------------------------------
+
+When the user enters Live AI Camera mode, hide the normal bottom navigation:
+
+Home
+Schedule
+AI
+History
+
+The camera experience should be immersive and focused.
+
+Do NOT remove or break the bottom navigation from the rest of the application.
+
+The user should be able to return to the previous screen using a clear top-left back/close button.
+
+--------------------------------------------------
+2. CREATE A PROFESSIONAL CAMERA HEADER
+--------------------------------------------------
+
+At the top:
+
+[ ← ]                 LIVE AI       [ ⚡ ]
+
+Left:
+- Back/close button
+- Return to the previous screen
+
+Center:
+LIVE AI
+
+Right:
+- Flash toggle
+- Preserve actual flash functionality if already implemented
+
+The header should sit safely within the Android safe area.
+
+Do NOT use a large traditional "Camera" title.
+
+The purpose should immediately communicate that this is an AI-powered live camera.
+
+--------------------------------------------------
+3. MAKE THE CAMERA PREVIEW THE PRIMARY EXPERIENCE
+--------------------------------------------------
+
+The camera preview should occupy most of the screen.
+
+Do NOT place unnecessary cards over the entire camera preview.
+
+The camera should feel immersive.
+
+Maintain the actual camera functionality.
+
+Do not replace the camera preview with a static image or placeholder.
+
+--------------------------------------------------
+4. CHANGE THE SCAN RECTANGLE INTO AN AI RECOGNITION AREA
+--------------------------------------------------
+
+The existing rounded rectangle currently looks like a photo/scanning frame.
+
+Redesign it so that it clearly communicates:
+
+"Adaptive AI is analyzing this area."
+
+Use subtle corner brackets or a refined rounded scanning frame.
+
+Do NOT make it look like a conventional QR scanner.
+
+Do NOT make it excessively thick or distracting.
+
+The frame should be elegant and minimal.
+
+Inside or near the frame, show a subtle instruction when no content is detected:
+
+"Point at a question or study material"
+
+Under it, optionally show:
+
+"Adaptive AI will analyze it in real time"
+
+Keep this text subtle so it doesn't obstruct the camera preview.
+
+--------------------------------------------------
+5. ADD LIVE AI STATUS
+--------------------------------------------------
+
+Near the top of the camera preview, add a small status indicator:
+
+● LIVE AI ANALYSIS
+
+Use the Adaptive AI teal/cyan accent.
+
+When the system is actively analyzing:
+
+● ANALYZING...
+
+When no useful content is detected:
+
+● LOOKING FOR CONTENT
+
+When a question/problem is detected:
+
+● QUESTION DETECTED
+
+The status should update dynamically based on the actual application state.
+
+Do NOT fake AI processing if the backend/model is not actually running.
+
+--------------------------------------------------
+6. ADD A REAL-TIME AI RESPONSE OVERLAY
+--------------------------------------------------
+
+This is the MOST IMPORTANT part of the redesign.
+
+The user should be able to see the AI response while continuing to view the camera preview.
+
+Create a compact bottom overlay/panel above the recording controls.
+
+Example:
+
+┌─────────────────────────────┐
+│ 🤖 Adaptive AI              │
+│                             │
+│ Question detected           │
+│ What is the derivative of   │
+│ x²?                         │
+│                             │
+│ Answer                      │
+│ 2x                          │
+└─────────────────────────────┘
+
+The panel should:
+- Have a dark/translucent premium appearance.
+- Match the Adaptive AI visual language.
+- Have rounded corners.
+- Not cover too much of the camera.
+- Be readable over different camera backgrounds.
+- Support scrolling if the answer becomes longer.
+- Update dynamically as new content is detected.
+
+If no AI answer is available yet, do NOT show fake content.
+
+Instead display:
+
+"Point the camera at a question to get help."
+
+or:
+
+"Waiting for content..."
+
+--------------------------------------------------
+7. DESIGN THE RECORDING CONTROL
+--------------------------------------------------
+
+The recording control should be clearly visible at the bottom.
+
+Use a professional circular recording button.
+
+Suggested structure:
+
+        ◉
+     Recording
+
+The button should:
+- Be approximately 64–72 px.
+- Be centered horizontally.
+- Have a clear active/inactive state.
+- Be fully visible.
+- Never be hidden behind UI elements.
+- Have sufficient touch area.
+
+When recording:
+
+🔴 Recording
+
+When not recording:
+
+○ Start Live Analysis
+
+Do NOT use a traditional "Take Photo" label.
+
+The primary action is live recording/analysis.
+
+--------------------------------------------------
+8. MAKE THE UI COMMUNICATE CONTINUOUS ANALYSIS
+--------------------------------------------------
+
+The user should understand that they do NOT need to repeatedly take screenshots.
+
+The experience should communicate:
+
+Start Live Analysis
+↓
+Point camera at content
+↓
+Adaptive AI detects content
+↓
+AI analyzes it
+↓
+Answer appears
+↓
+User continues recording
+↓
+AI updates when the visible content changes
+
+This is the core Adaptive AI experience.
+
+--------------------------------------------------
+9. HANDLE AI RESPONSE STATES
+--------------------------------------------------
+
+Design these states properly:
+
+STATE 1 — Idle
+
+LIVE AI
+
+"Point at a question or study material"
+
+Button:
+"Start Live Analysis"
+
+
+STATE 2 — Recording
+
+● LIVE AI ANALYSIS
+
+"Looking for content..."
+
+Recording indicator:
+
+🔴 Recording
+
+
+STATE 3 — Detecting content
+
+● ANALYZING...
+
+AI panel:
+
+"Analyzing what I see..."
+
+
+STATE 4 — Content detected
+
+● QUESTION DETECTED
+
+AI panel:
+
+Question detected
+
+[Detected question]
+
+Analyzing...
+
+
+STATE 5 — Answer available
+
+● AI RESPONSE READY
+
+AI panel:
+
+🤖 Adaptive AI
+
+Answer
+
+[AI-generated response]
+
+
+STATE 6 — No useful content
+
+● LOOKING FOR CONTENT
+
+"Point the camera at a clearer question or study material."
+
+
+STATE 7 — Error
+
+"Unable to analyze right now."
+
+Provide a small:
+"Try again"
+
+Do not crash the camera screen.
+
+--------------------------------------------------
+10. MAKE THE AI RESPONSE NON-INTRUSIVE
+--------------------------------------------------
+
+The AI response should NOT cover the entire camera.
+
+The user still needs to see what they are recording.
+
+Use a compact bottom sheet/card with a translucent or dark background.
+
+Consider:
+- 20–30% screen height for short answers.
+- Expandable response when necessary.
+- Smooth animation when the response changes.
+
+Do not use excessive animations.
+
+--------------------------------------------------
+11. PRESERVE ADAPTIVE AI BRANDING
+--------------------------------------------------
+
+Use the existing Adaptive AI visual identity.
+
+Primary visual language:
+- Teal/cyan accents
+- Dark navy
+- White/light text
+- Subtle transparency
+- Rounded modern surfaces
+
+Do not introduce random colors.
+
+The UI should feel like the same application as the Home screen.
+
+--------------------------------------------------
+12. REMOVE PHOTO-CAMERA ELEMENTS
+--------------------------------------------------
+
+Do NOT include:
+
+- Gallery button
+- Take photo button
+- Camera capture CTA
+- Voice button
+- Text button
+- Normal bottom navigation
+
+Those belong elsewhere in the application.
+
+This screen is specifically:
+
+LIVE AI CAMERA.
+
+--------------------------------------------------
+13. ADD OPTIONAL MICROPHONE CONTROL ONLY IF SUPPORTED
+--------------------------------------------------
+
+If the existing feature supports voice interaction during live analysis, you may include a small microphone control.
+
+However:
+
+Do NOT add a microphone button merely for decoration.
+
+Only show it if it actually performs a function.
+
+--------------------------------------------------
+14. RESPONSIVE DESIGN
+--------------------------------------------------
+
+Make the interface work properly on different Android screen sizes.
+
+Do not use excessive absolute positioning.
+
+Use:
+- Safe area handling
+- Flexbox
+- Responsive sizing
+- Proper camera preview scaling
+- Proper bottom spacing
+
+Ensure:
+- Recording button is never clipped.
+- AI response panel does not overlap important controls.
+- Top controls remain accessible.
+- Camera preview remains visible.
+
+--------------------------------------------------
+15. ACCESSIBILITY
+--------------------------------------------------
+
+All interactive elements should have:
+- Appropriate touch targets.
+- Accessible labels.
+- Sufficient contrast.
+- Clear active/inactive states.
+
+Do not rely solely on color to communicate state.
+
+--------------------------------------------------
+16. PERFORMANCE
+--------------------------------------------------
+
+This is a real-time camera + AI feature.
+
+Do NOT continuously send every camera frame to the backend.
+
+Use an efficient architecture such as:
+
+Camera
+↓
+Frame sampling / controlled capture
+↓
+Content detection
+↓
+Send selected frame(s) to AI vision backend
+↓
+AI response
+↓
+Update UI
+
+Avoid unnecessary API calls.
+
+Implement debouncing/throttling where appropriate.
+
+The UI should remain smooth while recording.
+
+Do not block the camera preview while waiting for the AI response.
+
+--------------------------------------------------
+17. IMPORTANT REAL-TIME AI BEHAVIOR
+--------------------------------------------------
+
+Do not claim "real-time" if the current backend does not actually support continuous analysis.
+
+Instead, structure the UI so it is ready for:
+
+controlled real-time / near-real-time analysis.
+
+For example:
+
+Camera frames
+→ sampled every X seconds
+→ backend vision model
+→ response
+→ update AI panel
+
+If the current implementation already has a real-time processing pipeline, integrate with it rather than replacing it.
+
+--------------------------------------------------
+18. PRESERVE EXISTING BACKEND/API
+--------------------------------------------------
+
+Do NOT unnecessarily change:
+- Authentication
+- User system
+- Database
+- Express backend
+- Existing AI APIs
+- Navigation
+- Existing camera permissions
+- Existing camera implementation
+
+Only modify what is required for the Live AI Camera UI/UX.
+
+If the AI endpoint already exists, use it.
+
+If the real-time AI endpoint does not yet exist, create the UI state architecture cleanly so the backend can be connected later.
+
+Do NOT fabricate successful AI responses.
+
+--------------------------------------------------
+19. FINAL VISUAL STRUCTURE
+--------------------------------------------------
+
+The final screen should approximately follow:
+
+┌──────────────────────────────┐
+│                              │
+│ ←       LIVE AI        ⚡    │
+│                              │
+│       ● LIVE ANALYSIS        │
+│                              │
+│                              │
+│     ┌──────────────────┐     │
+│     │                  │     │
+│     │   AI SCAN AREA   │     │
+│     │                  │     │
+│     │  Point camera    │     │
+│     │  at question     │     │
+│     │                  │     │
+│     └──────────────────┘     │
+│                              │
+│                              │
+│ ┌──────────────────────────┐ │
+│ │ 🤖 Adaptive AI           │ │
+│ │                          │ │
+│ │ Question detected        │ │
+│ │ Answer: 2x               │ │
+│ └──────────────────────────┘ │
+│                              │
+│             🔴               │
+│          Recording           │
+│                              │
+└──────────────────────────────┘
+
+The exact layout can be adjusted based on the existing implementation, but the hierarchy must remain:
+
+1. Camera preview
+2. Live AI status
+3. Recognition area
+4. Real-time AI response
+5. Recording control
+6. Back/flash controls
+
+--------------------------------------------------
+20. FINAL QUALITY CHECK
+--------------------------------------------------
+
+Before finishing:
+
+- Test camera permissions.
+- Test starting/stopping recording.
+- Test AI loading state.
+- Test AI response state.
+- Test no-content state.
+- Test error state.
+- Test long AI responses.
+- Test small Android screens.
+- Test that the recording button is completely visible.
+- Test that the AI response doesn't cover the important camera area.
+- Test that the top controls are accessible.
+- Test that normal bottom navigation remains unchanged elsewhere.
+- Ensure there is no unnecessary blank space.
+- Ensure the UI clearly communicates LIVE AI ASSISTANCE.
+- Ensure the experience feels like a premium AI product, not a generic camera screen.
+
+MOST IMPORTANT PRODUCT PRINCIPLE:
+
+This is NOT a camera for taking pictures.
+
+This is:
+
+"Adaptive AI's eyes."
+
+The user points the camera at something, records, and receives AI assistance while the content is being viewed.
+
+Design the entire experience around that concept.

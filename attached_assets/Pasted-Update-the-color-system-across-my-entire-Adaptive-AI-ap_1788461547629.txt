@@ -1,0 +1,94 @@
+Update the color system across my entire Adaptive AI app to create a consistent, professional visual identity.
+
+IMPORTANT:
+Do not redesign the UI or change layouts. Only update the background/color system.
+
+GLOBAL COLOR SYSTEM:
+
+Main app background:
+#F3F7F8
+
+Card background:
+#FFFFFF
+
+Primary dark/navy:
+#12364A
+
+Primary cyan/teal:
+#16C7C5
+
+Secondary blue:
+#1677E8
+
+Primary text:
+#102A43
+
+Secondary text:
+#607D8B
+
+Borders:
+#D9E5E8
+
+Success:
+#2E9B6F
+
+Warning:
+#E6A23C
+
+Keep the existing soft peach color used for the Next Class card.
+
+PAGE REQUIREMENTS:
+
+1. HOME
+- Change the main background to #F3F7F8.
+- Keep the dark Adaptive AI section.
+- Keep the peach Next Class card.
+- Keep existing cyan/teal accents.
+
+2. SCHEDULE
+- Main background: #F3F7F8.
+- Schedule/class cards: #FFFFFF.
+- Use #102A43 for headings.
+- Use #16C7C5 for important AI/active accents.
+- Keep the interface clean and easy to scan.
+
+3. AI
+- Main background: #F3F7F8.
+- Keep dark navy AI sections using #12364A.
+- Use cyan #16C7C5 for AI-related buttons, icons, and active states.
+- Do not make the entire page dark.
+
+4. HISTORY
+- Main background: #F3F7F8.
+- History items/cards: #FFFFFF.
+- Use subtle #D9E5E8 borders.
+- Keep the interface minimal and professional.
+
+5. SETTINGS
+- Main background: #F3F7F8.
+- Settings cards/sections: #FFFFFF.
+- Keep the existing visual hierarchy.
+- Use #102A43 for headings and #607D8B for secondary text.
+
+6. LIVE AI CAMERA
+- Keep this screen dark/immersive.
+- Use dark navy/near-black as the background.
+- Keep cyan/teal AI scanning elements.
+- Keep the camera preview as the dominant visual.
+- Do not change the existing camera functionality.
+
+7. BOTTOM NAVIGATION
+- Keep the existing bottom navigation design.
+- Make sure it visually fits with the new #F3F7F8 background.
+- Active icon/text can use #16C7C5.
+- Inactive icons/text should use a muted gray-blue.
+
+IMPORTANT:
+- Do not give each page a different random background color.
+- Use #F3F7F8 as the consistent background across normal app pages.
+- Use white cards for content.
+- Use navy for important AI sections.
+- Use cyan/teal as the primary brand accent.
+- Keep the existing peach Next Class card.
+- Preserve all layouts, spacing, typography, icons, navigation, and functionality.
+- Do not make unrelated changes.

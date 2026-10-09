@@ -1,0 +1,6 @@
+import React from 'react';
+import { Pressable, Text, View } from 'react-native';
+import { Link, useLocalSearchParams, useRouter } from 'expo-router';
+import { Feather } from '@expo/vector-icons';
+import { Button, Screen, styles } from '@/components/UI';
+export default function Confirmation() { const router = useRouter(); const { email } = useLocalSearchParams<{ email?: string }>(); return <Screen title="Check your email" subtitle="This is a simulated development reset flow; no email was sent."><View style={styles.confirmation}><View style={styles.confirmationIcon}><Feather name="mail" size={28} color="#0F766E" /></View><Text style={{ color: '#1E293B', fontWeight: '700', fontSize: 17 }}>Check your email</Text><Text style={{ color: '#64748B', textAlign: 'center', lineHeight: 21, marginTop: 8 }}>In production, a reset link would be sent to {email || 'your inbox'}.</Text></View><Button label="Development mode: Continue to reset password" onPress={() => router.push({ pathname: '/(auth)/reset-password', params: { email } })} /><Link href="/(auth)/login" asChild><Pressable accessibilityRole="link" style={styles.authLink}><Text style={{ color: '#0F766E', fontWeight: '700', textAlign: 'center' }}>Return to login</Text></Pressable></Link></Screen>; }

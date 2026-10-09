@@ -1,0 +1,372 @@
+## TEMPORARY DUMMY AUTHENTICATION — DEVELOPMENT MODE
+
+For now, temporarily remove/bypass the real authentication backend and implement a simple **dummy authentication system** so I can test the complete UI and navigation flow.
+
+This is ONLY for development/testing. Do not treat this as production authentication.
+
+### 1. Dummy Account
+
+Use this fixed demo account:
+
+**Email:** `demo@adaptiveai.com`
+
+**Password:** `Demo@12345`
+
+The dummy credentials should be stored in one centralized authentication configuration, not duplicated throughout the screens.
+
+---
+
+## 2. LOGIN
+
+The Login screen should accept:
+
+```text
+Email: demo@adaptiveai.com
+Password: Demo@12345
+```
+
+When the credentials are correct:
+
+**Login → Home Dashboard**
+
+The user should be authenticated immediately using local/dummy state.
+
+Do NOT make a real Firebase/API authentication request for this temporary development mode.
+
+If the credentials are incorrect:
+
+* Show the existing inline validation/error UI.
+* Show a non-blocking error banner.
+* Keep the entered email.
+* Do not clear the email field.
+
+Example:
+
+**Invalid email or password. Please try again.**
+
+---
+
+## 3. REGISTRATION
+
+For now, make Registration work with dummy/local authentication as well.
+
+When the user completes the registration form successfully:
+
+1. Validate:
+
+   * Name
+   * Email
+   * Password
+   * Confirm password
+   * Terms & Privacy checkbox
+
+2. Save the registered user's information to local app state/storage.
+
+3. Immediately authenticate the user.
+
+4. Navigate directly to:
+
+**Home Dashboard**
+
+Do NOT send the user back to Login after successful registration.
+
+---
+
+## 4. IMPORTANT: SIGN UP → HOME
+
+Fix the current issue where:
+
+**Sign Up → does not navigate to Home**
+
+The expected behavior is:
+
+```text
+Registration
+      ↓
+Validation
+      ↓
+Create dummy/local user
+      ↓
+Set authenticated = true
+      ↓
+Home Dashboard
+```
+
+The user should NOT have to manually log in immediately after registration.
+
+---
+
+## 5. LOGIN AFTER REGISTRATION
+
+If a user registers using a new email/password, store those credentials in local development storage so that the user can subsequently log out and log back in.
+
+Example:
+
+```text
+Sign Up
+Email: asad@example.com
+Password: Test@123
+Name: Asad
+        ↓
+Account created locally
+        ↓
+Home
+        ↓
+Logout
+        ↓
+Login
+        ↓
+asad@example.com + Test@123
+        ↓
+Home
+```
+
+The dummy/local authentication system should therefore support:
+
+* Create account
+* Login
+* Logout
+* Persist user session
+* Retrieve current user
+* Profile information
+
+---
+
+## 6. DEMO ACCOUNT
+
+Also keep the predefined demo account available:
+
+```text
+Email: demo@adaptiveai.com
+Password: Demo@12345
+Name: Demo User
+```
+
+This account should always work during development.
+
+---
+
+## 7. PROFILE DATA
+
+The authenticated user's information should be available throughout the application.
+
+At minimum store:
+
+```text
+id
+name
+email
+profilePhoto
+```
+
+The Home dashboard should use the authenticated user's name.
+
+For example:
+
+```text
+Good morning, Asad 👋
+```
+
+instead of:
+
+```text
+Good morning
+```
+
+If the name is unavailable:
+
+```text
+Good morning 👋
+```
+
+Do NOT display:
+
+```text
+Good morning, undefined
+Good morning, null
+```
+
+---
+
+## 8. PROFILE → HOME SYNCHRONIZATION
+
+If the user changes their name in:
+
+**Profile → Edit Profile**
+
+the Home greeting should update automatically.
+
+Example:
+
+```text
+Profile
+Name: Asadullah
+
+        ↓
+
+Home
+
+Good morning, Asadullah 👋
+```
+
+No logout/login should be required.
+
+---
+
+## 9. LOGOUT
+
+Implement working logout.
+
+When the user taps:
+
+**Profile → Log Out**
+
+the app should:
+
+1. Clear the current authenticated session.
+2. Return to Login.
+3. Prevent access to Home until the user logs in again.
+
+---
+
+## 10. SESSION PERSISTENCE
+
+Persist the dummy authentication state locally so that refreshing/reopening the app does not unnecessarily log the user out.
+
+Use the appropriate local storage mechanism for the existing project architecture.
+
+Do not store passwords insecurely in production-style persistent storage. This is a temporary development-only authentication implementation.
+
+---
+
+## 11. IMPORTANT: KEEP AUTH LOGIC CENTRALIZED
+
+Create/reuse a single authentication service/context/store.
+
+For example:
+
+```text
+AuthProvider
+AuthContext
+authService
+```
+
+It should expose functionality similar to:
+
+```text
+login()
+signup()
+logout()
+getCurrentUser()
+isAuthenticated
+currentUser
+```
+
+Do not implement separate authentication logic inside Login, Registration, Home, and Profile.
+
+---
+
+## 12. DO NOT BREAK THE UI
+
+Keep the existing:
+
+* Login design
+* Registration design
+* Profile design
+* Home dashboard
+* Adaptive AI color system
+* Accessibility features
+* Voice-guided login
+* Personalized greeting
+* Navigation
+
+Only replace/bypass the authentication backend temporarily.
+
+---
+
+## 13. CLEAR DEVELOPMENT MODE
+
+Add a clearly identifiable development configuration such as:
+
+```text
+AUTH_MODE = "dummy"
+```
+
+or an equivalent environment/configuration mechanism.
+
+Make it easy to replace the dummy authentication with Firebase/real authentication later.
+
+Do NOT permanently delete the existing authentication integration if it already exists.
+
+The goal is:
+
+**UI + Navigation + User Flow → fully testable now**
+
+while keeping the architecture ready for:
+
+**Dummy Auth → Real Authentication**
+
+later.
+
+---
+
+## FINAL EXPECTED FLOWS
+
+### Demo Login
+
+```text
+Login
+Email: demo@adaptiveai.com
+Password: Demo@12345
+        ↓
+      Login
+        ↓
+      Home
+```
+
+### New User Registration
+
+```text
+Registration
+Name: Asad
+Email: asad@example.com
+Password: Test@123
+Confirm: Test@123
+Terms: ✓
+        ↓
+ Create Account
+        ↓
+      Home
+```
+
+### Returning User
+
+```text
+Login
+Email: asad@example.com
+Password: Test@123
+        ↓
+      Login
+        ↓
+      Home
+```
+
+### Logout
+
+```text
+Home
+  ↓
+Profile
+  ↓
+Logout
+  ↓
+Login
+```
+
+### Personalized Home
+
+```text
+Good morning, Asad 👋
+```
+
+The implementation should make these flows work reliably before reconnecting real Firebase/backend authentication.

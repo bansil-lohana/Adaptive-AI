@@ -1,0 +1,56 @@
+Fix the bottom content visibility issue on the Settings/Profile screen of my Adaptive AI React Native / Expo app.
+
+BUG:
+On the Settings screen, the "About" section at the bottom is partially hidden behind the fixed bottom navigation bar. The bottom navigation (Home, Schedule, AI, History) overlaps the content, so the user cannot properly see the full About card/text.
+
+REQUIREMENTS:
+
+1. Fix the screen layout so ALL content can be scrolled above the bottom navigation bar.
+
+2. The bottom navigation must remain fixed at the bottom of the screen.
+
+3. Add appropriate bottom spacing/padding to the ScrollView/FlatList/content container so the last section, especially the "About" card, can scroll completely above the bottom navigation.
+
+4. Do NOT simply move the bottom navigation upward.
+
+5. Do NOT redesign the UI.
+
+6. Preserve the existing:
+   - Settings screen design
+   - About section
+   - Bottom navigation
+   - Icons
+   - Fonts
+   - Colors
+   - Spacing/design style
+
+7. The user should be able to scroll to the very bottom and see the entire About card without any part being covered by the navigation bar.
+
+8. Make the solution responsive for different Android/iOS screen sizes and aspect ratios.
+
+9. If the screen uses SafeAreaView, SafeAreaProvider, ScrollView, FlatList, or an absolute-positioned bottom tab bar, make sure they work together correctly.
+
+10. Prefer a proper layout solution rather than hardcoding a single screen height.
+
+For example, if the screen uses a ScrollView, use an appropriate contentContainerStyle such as:
+
+contentContainerStyle={{
+  paddingBottom: BOTTOM_TAB_HEIGHT + SAFE_AREA_BOTTOM + 20,
+}}
+
+where BOTTOM_TAB_HEIGHT represents the actual bottom navigation height.
+
+If using SafeAreaView/useSafeAreaInsets, use the device's bottom inset rather than assuming it is always zero.
+
+11. Check for `position: 'absolute'` on the bottom navigation. If it is intentionally fixed, keep it fixed but make sure the scrollable content has enough bottom padding.
+
+12. Test the complete flow:
+   - Open Settings
+   - Scroll to the bottom
+   - About section should be fully visible
+   - Bottom navigation should stay fixed
+   - No content should be hidden behind the navigation bar
+   - Works on different screen sizes
+
+IMPORTANT:
+Do not make unrelated changes. Only fix the content being obscured by the bottom navigation bar.

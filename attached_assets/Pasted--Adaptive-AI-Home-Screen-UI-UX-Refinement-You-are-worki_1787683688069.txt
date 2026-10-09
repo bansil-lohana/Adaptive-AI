@@ -1,0 +1,976 @@
+# Adaptive AI — Home Screen UI/UX Refinement
+
+You are working on my existing **Adaptive AI mobile application**.
+
+I want you to perform a **professional UI/UX refinement pass on the existing Home screen**.
+
+## IMPORTANT — DO NOT REDESIGN FROM SCRATCH
+
+This is a **refinement pass, NOT a complete redesign**.
+
+Before making any changes:
+
+1. Inspect the existing project structure.
+2. Inspect the current Home screen implementation.
+3. Inspect the existing navigation.
+4. Inspect reusable UI components.
+5. Inspect the existing color/theme system.
+6. Inspect current data/state management.
+7. Inspect existing icon libraries/components.
+8. Identify what can be modified instead of creating duplicate components.
+
+Then make the changes below while preserving the application's existing visual identity.
+
+### Preserve
+
+* Existing teal brand color
+* Existing coral/peach color
+* Existing navy AI surface
+* Existing typography where appropriate
+* Existing overall layout structure
+* Existing bottom navigation style
+* Existing reusable components
+* Existing functionality unrelated to this request
+
+Do NOT introduce a completely different design language.
+
+Do NOT unnecessarily add new dependencies.
+
+Do NOT rewrite working functionality just to achieve the UI changes.
+
+---
+
+# 1. HEADER SECTION
+
+## Reduce unnecessary top spacing
+
+Reduce the vertical padding/gap between the status bar/header area and the **ADAPTIVE AI** branding.
+
+The current top area has too much empty space.
+
+Reduce it approximately by half while maintaining proper safe-area spacing.
+
+Do not remove safe-area handling.
+
+---
+
+## Simplify the header hierarchy
+
+There should be **ONE clear primary header hierarchy**.
+
+Do not display multiple competing titles such as:
+
+* ADAPTIVE AI
+* Home
+* another large page title
+
+Choose a clean structure.
+
+Preferred approach:
+
+```text
+ADAPTIVE AI                              [AS]
+Good evening, Asadullah 👋
+You have 1 class and 2 pending tasks today
+```
+
+The brand should remain subtle while the greeting becomes the main contextual content.
+
+Do NOT create a large separate "Home" title if it adds visual redundancy.
+
+---
+
+# 2. PROFILE ACCESS
+
+The **AS avatar in the top-right should be the ONLY Profile access point from the Home screen/navigation.**
+
+Remove **Profile** from the bottom navigation.
+
+The avatar must be tappable and should navigate to the existing Profile screen.
+
+Add an accessibility label:
+
+```text
+"Open profile"
+```
+
+Do not create another Profile button elsewhere on the Home screen.
+
+---
+
+# 3. BOTTOM NAVIGATION
+
+After removing Profile, use the bottom navigation for the application's core flows.
+
+Preferred navigation:
+
+```text
+Home
+Schedule
+AI
+History
+```
+
+If **AI already exists**, keep it.
+
+If AI does not exist, add it as the replacement for Profile.
+
+Do NOT add Notifications merely to fill space unless the application already has a real notification feature.
+
+The priority is:
+
+**Core functionality > filling navigation slots.**
+
+Four clear navigation destinations are completely acceptable.
+
+Do NOT create unnecessary navigation items.
+
+---
+
+## Bottom navigation requirements
+
+Ensure:
+
+* Consistent icon set
+* Consistent icon stroke width
+* Consistent outline/filled style
+* Minimum 44x44pt touch target for every tab
+* Clear active/selected state
+* Current Home tab visibly selected
+* Smooth press feedback
+* Proper accessibility labels
+
+Example:
+
+```text
+Home       Schedule       AI       History
+ ●            ○           ○          ○
+```
+
+The active state should use the existing teal brand color.
+
+Do not introduce a new color solely for navigation.
+
+---
+
+# 4. GREETING
+
+Change the greeting to use the user's **first name only**.
+
+Instead of:
+
+```text
+Good evening, ASADULLAH MALIK
+```
+
+use:
+
+```text
+Good evening, Asadullah 👋
+```
+
+Use the actual user's first name dynamically from the profile/authentication state.
+
+Do NOT hard-code "Asadullah" if the application already has user data available.
+
+---
+
+# 5. DYNAMIC GREETING SUBTEXT
+
+Replace generic static text such as:
+
+```text
+Here's what's happening today.
+```
+
+with meaningful dynamic information.
+
+Example:
+
+```text
+You have 1 class and 2 pending tasks today.
+```
+
+The values must be generated dynamically from available application data.
+
+Examples:
+
+```text
+You have 1 class and 2 pending tasks today.
+
+You have 3 classes today.
+
+You have no classes today. Great time to catch up!
+
+You have 2 classes and no pending tasks today.
+```
+
+Handle singular/plural grammar correctly:
+
+```text
+1 class
+2 classes
+
+1 pending task
+2 pending tasks
+```
+
+If task data is not currently available, do NOT invent fake data in production logic.
+
+Use the existing data model/state if available.
+
+---
+
+# 6. NEXT CLASS CARD
+
+Improve the existing Next Class card without changing its overall visual identity.
+
+## Entire card must be tappable
+
+The entire card should be a button/touchable surface.
+
+Do NOT make only "View schedule" clickable.
+
+Tapping anywhere on the card should navigate to the appropriate Schedule/Class detail screen.
+
+Add a trailing chevron:
+
+```text
+>
+```
+
+or the equivalent icon from the existing icon set.
+
+The chevron should visually communicate:
+
+**This card is actionable.**
+
+Add an accessible label such as:
+
+```text
+"View next class details"
+```
+
+---
+
+# 7. NEXT CLASS INFORMATION
+
+Use correct icons.
+
+Time:
+
+```text
+[clock icon] 12:00 PM
+```
+
+Location:
+
+```text
+[location pin] DB-04
+```
+
+Do NOT mix clock/location icons.
+
+Use the same icon library and stroke weight already used throughout the app.
+
+---
+
+# 8. DYNAMIC CLASS COUNTDOWN
+
+Make the next-class time contextual.
+
+Do NOT hard-code relative text.
+
+Calculate the time using the current date/time and the class schedule.
+
+### Rules
+
+If the class is happening now:
+
+```text
+Now
+```
+
+If the class is later today:
+
+```text
+in 2h 15m
+```
+
+If the class is tomorrow:
+
+```text
+Tomorrow · 12:00 PM
+```
+
+If it is further away:
+
+```text
+Wed · 12:00 PM
+```
+
+The countdown must update appropriately as time passes.
+
+If the class has already ended, do not display it as the next class.
+
+Use the next upcoming class from the available schedule data.
+
+---
+
+# 9. NEXT CLASS ACCESSIBILITY
+
+Check the contrast of the coral/orange text against the peach background.
+
+Body text must meet:
+
+**WCAG AA — minimum 4.5:1 contrast ratio.**
+
+If the current coral does not meet the requirement, adjust the coral shade slightly darker while preserving the application's overall color palette.
+
+Do not replace the entire color system.
+
+---
+
+# 10. ASK ADAPTIVE AI — HERO INTERACTION
+
+The **Ask Adaptive AI** section is the core feature of the application.
+
+Make it visually and interactively feel like the primary action.
+
+Preserve the existing navy AI card.
+
+Increase:
+
+* Internal padding
+* Touch target sizes
+* Button spacing
+* Visual prominence
+
+Do not make it excessively large.
+
+It should remain balanced with the rest of the Home screen.
+
+---
+
+# 11. INLINE AI INPUT
+
+Add a tappable text input/search-style field INSIDE the Ask Adaptive AI card.
+
+Preferred structure:
+
+```text
+┌──────────────────────────────────┐
+│ Ask Adaptive AI                  │
+│                                  │
+│ ┌──────────────────────────────┐ │
+│ │ Ask anything...       🎤 📷 │ │
+│ └──────────────────────────────┘ │
+│                                  │
+│   Voice       Camera      Text   │
+└──────────────────────────────────┘
+```
+
+The exact layout can be adapted to the existing design.
+
+The user should be able to begin typing immediately without first navigating to another screen.
+
+The text input should be tappable.
+
+Voice and Camera should remain alternate input methods.
+
+---
+
+# 12. AI INPUT BEHAVIOR
+
+When the user submits text:
+
+```text
+User enters question
+↓
+Submit
+↓
+AI processing
+↓
+AI response
+```
+
+Use the application's existing AI functionality if it already exists.
+
+Do NOT create fake AI responses unless the current application is already using mock data.
+
+If AI functionality is not implemented yet, keep the UI interaction architecture clean so it can connect to the existing/future AI service.
+
+---
+
+# 13. VOICE BUTTON
+
+The Voice button needs clear interaction states.
+
+At minimum:
+
+### Idle
+
+Normal microphone icon.
+
+### Listening
+
+Show a subtle pulsing/listening animation.
+
+Example:
+
+```text
+🎤
+Listening...
+```
+
+The animation should be subtle and professional.
+
+### Processing
+
+Show an appropriate loading state.
+
+### Error
+
+Show a clear error state and allow retry.
+
+Do not use excessive animation.
+
+Respect reduced-motion accessibility settings.
+
+---
+
+# 14. AI RESPONSE LOADING
+
+When the AI is generating a response, show a clear loading state.
+
+Use an appropriate loading indicator or skeleton instead of leaving the UI frozen.
+
+Example:
+
+```text
+Thinking...
+•••
+```
+
+or a subtle animated loading indicator.
+
+The user should understand that the application is processing their request.
+
+---
+
+# 15. LIGHTNING BOLT ICON
+
+There is currently a lightning bolt icon in the top-right of the Ask Adaptive AI card.
+
+Do NOT leave it there without a clear purpose.
+
+Choose ONE:
+
+### Option A — Functional shortcut
+
+If it represents a meaningful feature, make it tappable and clearly communicate its purpose.
+
+For example:
+
+```text
+Quick Ask
+```
+
+with an accessible label.
+
+### Option B — Decorative
+
+If it has no actual function, remove it.
+
+Do NOT keep decorative icons that appear to be actionable.
+
+---
+
+# 16. AI BUTTON TOUCH TARGETS
+
+Ensure Voice, Camera, and Text controls have at least:
+
+**44x44pt**
+
+touch targets.
+
+Use sufficient spacing so adjacent controls cannot easily be tapped accidentally.
+
+Buttons should have:
+
+* Normal state
+* Pressed state
+* Disabled state where appropriate
+* Loading state where appropriate
+
+---
+
+# 17. RECENT ACTIVITY
+
+Improve the current empty state.
+
+Instead of only:
+
+```text
+No activity yet
+```
+
+show a useful empty state.
+
+Example:
+
+```text
+        [small AI/activity icon]
+
+No activity yet
+
+Ask Adaptive AI something and your recent
+activity will appear here.
+
+[Ask Adaptive AI]
+```
+
+The CTA should navigate/focus the user on the AI input.
+
+Do not create a fake activity item just to avoid an empty state.
+
+---
+
+# 18. SEE ALL
+
+If Recent Activity contains navigable activity:
+
+Display:
+
+```text
+Recent activity                    See all →
+```
+
+Make "See all" tappable.
+
+If there is no activity list/detail screen yet, do NOT create a misleading navigation affordance.
+
+In that case, remove the arrow/See all action until the destination exists.
+
+---
+
+# 19. DESIGN SYSTEM
+
+Standardize the visual system across the Home screen.
+
+## Corner radius
+
+Use:
+
+```text
+Cards:       16px
+Buttons:     12px
+Input fields: 12px
+Avatar:      50% / full circle
+```
+
+Do not introduce arbitrary corner radii.
+
+If the existing design system already has equivalent tokens, reuse them rather than hard-coding values.
+
+---
+
+# 20. SPACING SYSTEM
+
+Use a consistent spacing scale:
+
+```text
+4px
+8px
+12px
+16px
+24px
+32px
+```
+
+Avoid arbitrary spacing such as:
+
+```text
+13px
+19px
+27px
+31px
+```
+
+unless technically necessary.
+
+Prefer existing design tokens if the project already defines them.
+
+---
+
+# 21. COLOR SYSTEM
+
+Preserve the existing palette and apply clear semantic rules.
+
+### Teal
+
+Use for:
+
+* Primary interactive elements
+* Active navigation state
+* Links
+* Primary CTA
+* Interactive highlights
+
+### Coral / Peach
+
+Use for:
+
+* Time-sensitive class information
+* Alerts
+* Schedule emphasis
+
+Ensure sufficient contrast.
+
+### Navy
+
+Use for:
+
+* Adaptive AI feature surface
+* AI-related content
+* Primary AI interaction area
+
+Do not introduce random new accent colors.
+
+---
+
+# 22. ICON CONSISTENCY
+
+Use ONE consistent icon library/style throughout the Home screen.
+
+All icons should have:
+
+* Consistent stroke width
+* Consistent visual weight
+* Consistent size hierarchy
+* Consistent alignment
+
+Do not mix unrelated icon styles.
+
+Reuse the existing icon library if one is already installed.
+
+Do NOT add a new icon dependency unless absolutely necessary.
+
+---
+
+# 23. PRESS / TAP FEEDBACK
+
+Interactive elements should provide immediate feedback.
+
+For cards and buttons, implement a subtle:
+
+* Scale-down
+* Opacity change
+* Ripple
+* Highlight
+
+depending on the platform/framework.
+
+Keep it subtle.
+
+Do not make interactions feel animated for the sake of animation.
+
+---
+
+# 24. LOADING / SKELETON STATES
+
+Add loading states for dynamic content.
+
+## Next Class
+
+While schedule data is loading:
+
+Show a skeleton placeholder instead of:
+
+* Blank card
+* Incorrect content
+* Flash of empty state
+
+## Recent Activity
+
+While activity data is loading:
+
+Show a skeleton placeholder.
+
+The skeleton should match the approximate layout of the real content.
+
+Avoid unnecessary loading animations.
+
+---
+
+# 25. ACCESSIBILITY
+
+Review every interactive element.
+
+Add appropriate accessibility labels to:
+
+* Profile avatar
+* Next Class card
+* Next Class chevron
+* Voice button
+* Camera button
+* Text input
+* AI submit button
+* Lightning shortcut if retained
+* See all
+* Bottom navigation items
+
+Do not rely only on icons to communicate meaning.
+
+Icon-only buttons must have accessible labels.
+
+---
+
+# 26. TOUCH TARGETS
+
+All interactive controls should have a minimum touch target of:
+
+**44x44pt**
+
+This includes:
+
+* Profile avatar
+* Chevrons
+* Voice
+* Camera
+* AI submit
+* Bottom navigation
+* See all
+* Any icon-only controls
+
+The visual icon itself may be smaller, but its interactive container should meet the touch target requirement.
+
+---
+
+# 27. CONTRAST
+
+Check all text/background combinations.
+
+Minimum:
+
+**WCAG AA**
+
+For normal body text:
+
+**4.5:1**
+
+For large text:
+
+**3:1**
+
+Pay particular attention to:
+
+* Coral text on peach
+* Teal text on light background
+* Secondary gray text
+* Text inside navy AI card
+* Disabled states
+
+Do not sacrifice accessibility for aesthetics.
+
+---
+
+# 28. RESPONSIVE LAYOUT
+
+Make sure the Home screen works on different mobile screen sizes.
+
+Test:
+
+* Small phones
+* Standard phones
+* Large phones
+
+Ensure:
+
+* No text clipping
+* No horizontal overflow
+* No overlapping cards
+* Keyboard does not hide the AI input
+* Bottom navigation does not overlap content
+* Safe areas are respected
+* Dynamic content does not break the layout
+
+---
+
+# 29. STATE HANDLING
+
+The Home screen should support at least:
+
+```text
+Loading
+Loaded
+Empty
+Error
+```
+
+For relevant sections.
+
+For example:
+
+```text
+Next Class
+├── Loading
+├── Has upcoming class
+├── No upcoming class
+└── Error
+
+Recent Activity
+├── Loading
+├── Has activity
+├── Empty
+└── Error
+
+AI
+├── Idle
+├── Listening
+├── Processing
+├── Success
+└── Error
+```
+
+Do not implement only the ideal "loaded" state.
+
+---
+
+# 30. DATA-DRIVEN CONTENT
+
+Do not hard-code dynamic information such as:
+
+* User name
+* Class time
+* Class room
+* Number of classes
+* Number of tasks
+* Recent activity
+* Countdown
+
+Use the application's existing data/state architecture.
+
+If a required data source does not exist yet, create a clean mock data source only where necessary and clearly separate it from production data.
+
+---
+
+# 31. NAVIGATION RULES
+
+After these changes:
+
+### Profile
+
+```text
+Home → AS avatar → Profile
+```
+
+### Schedule
+
+```text
+Home → Next Class card → Schedule/Class details
+```
+
+### AI
+
+```text
+Home → AI input → AI experience
+Home → AI tab → AI experience
+```
+
+### History
+
+```text
+Home → History tab → History
+```
+
+Do not create duplicate navigation paths unless they provide genuine UX value.
+
+---
+
+# 32. DO NOT BREAK EXISTING FEATURES
+
+After implementing the Home screen refinement, verify that these existing areas still work:
+
+* Authentication
+* Home
+* Schedule
+* AI
+* History
+* Profile
+* Edit Profile
+* Change Password
+* Logout
+* Existing data/state handling
+
+Do not modify unrelated functionality.
+
+---
+
+# 33. IMPLEMENTATION PROCESS
+
+Follow this process:
+
+### Step 1 — Inspect
+
+Understand the existing implementation before changing anything.
+
+### Step 2 — Plan
+
+Identify:
+
+* Components to modify
+* Components to reuse
+* Navigation changes
+* State changes
+* Data dependencies
+* Accessibility improvements
+
+### Step 3 — Implement
+
+Make the changes incrementally.
+
+### Step 4 — Test
+
+Run/build the application.
+
+Fix:
+
+* Compilation errors
+* Runtime errors
+* Navigation errors
+* Layout issues
+* Type errors
+* Accessibility issues
+
+### Step 5 — Review
+
+Compare the final Home screen against every requirement in this prompt.
+
+Do not stop after modifying the UI code.
+
+---
+
+# 34. FINAL QUALITY STANDARD
+
+The final Home screen should feel like a **production-quality AI education/productivity application**.
+
+It should be:
+
+* Clean
+* Modern
+* Accessible
+* Fast to understand
+* Easy to navigate
+* Consistent
+* Interactive
+* Data-driven
+* Professional
+
+The goal is **not to add more UI**.
+
+The goal is to make the existing UI **clearer, more useful, more accessible, and more polished**.
+
+Most importantly:
+
+> **Refine the existing Adaptive AI design. Do not replace it with a completely different design.**

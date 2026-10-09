@@ -1,0 +1,412 @@
+Act as a senior product designer and senior React Native/Expo engineer. I want you to professionally refine the Home/Dashboard screen of my Adaptive AI Android app.
+
+IMPORTANT:
+- Do NOT redesign the app from scratch.
+- Preserve the current overall visual identity, layout structure, navigation, functionality, API integrations, authentication, timetable logic, and existing features.
+- Make only professional UI/UX improvements.
+- The result should look like a polished production-level student productivity/AI application.
+- Do not introduce unnecessary features just to fill empty space.
+- Maintain responsive behavior across Android screen sizes.
+- Follow modern mobile UI/UX principles: hierarchy, spacing, typography, accessibility, consistency, and visual balance.
+
+CURRENT HOME SCREEN STRUCTURE:
+1. Top "Home" text/header
+2. Adaptive AI branding row with "ADAPTIVE AI" and profile avatar
+3. Personalized greeting
+4. Next Class card
+5. Ask Adaptive AI card
+6. Bottom navigation: Home, Schedule, AI, History
+
+IMPLEMENT THE FOLLOWING MODIFICATIONS:
+
+1. REMOVE THE REDUNDANT "HOME" HEADER
+--------------------------------------
+Remove the standalone "Home" text at the very top of the screen.
+
+Reason:
+- The bottom navigation already clearly indicates that the user is on Home.
+- The extra "Home" header makes the screen feel like it has two navigation layers.
+- Removing it will create a cleaner and more premium first impression.
+
+The top of the screen should now begin with:
+
+ADAPTIVE AI                              [Avatar]
+
+Good morning, [First Name] 👋
+You have no classes today. Great time to catch up!
+
+Do NOT leave a large empty area where the "Home" header used to be.
+
+2. IMPROVE TOP SPACING
+----------------------
+After removing the Home header, position the "ADAPTIVE AI" branding row close enough to the top to feel intentional.
+
+Use approximately:
+- 16–24 px top padding from the safe area/content boundary.
+- Balanced spacing between the branding row and greeting.
+- Do not create excessive whitespace.
+
+The top section should feel compact, premium, and intentional.
+
+3. ADAPTIVE AI BRANDING
+-----------------------
+Keep the existing "ADAPTIVE AI" branding.
+
+Do not replace the branding with a generic title.
+
+Preserve its current teal/cyan branding style, but make sure:
+- Letter spacing looks intentional.
+- Font weight is professional.
+- Alignment with the profile avatar is perfect.
+- The branding is vertically centered with the avatar.
+- It does not compete visually with the main greeting.
+
+4. PROFILE AVATAR
+-----------------
+Keep the current demo initials avatar functionality.
+
+For the demo account, "DE" is acceptable.
+
+However, polish the avatar:
+- Perfect circular shape.
+- Consistent size.
+- Proper vertical alignment.
+- Subtle background treatment.
+- Clean typography for initials.
+- Ensure it doesn't visually merge with the greeting.
+- Maintain enough spacing between the avatar and the branding.
+
+Keep support for dynamic user profile images if that functionality already exists.
+
+Do NOT remove profile functionality.
+
+5. PERSONALIZED GREETING
+------------------------
+Keep the existing dynamic greeting system.
+
+For the demo account:
+
+"Good morning, Demo 👋"
+
+is perfectly acceptable.
+
+For real users, dynamically use their first name.
+
+Maintain dynamic time-based greetings:
+
+Good morning, [Name] 👋
+Good afternoon, [Name] 👋
+Good evening, [Name] 👋
+
+Do not hard-code "Demo".
+
+Keep the supporting text:
+
+"You have no classes today. Great time to catch up!"
+
+when applicable.
+
+6. NEXT CLASS CARD
+------------------
+Keep the current Next Class card design and functionality.
+
+Do not remove timetable information.
+
+Maintain:
+- NEXT CLASS label
+- Date/time
+- Course name
+- Class time
+- Location
+- "View schedule" action
+
+Improve the CTA copy from:
+
+"View schedule →"
+
+to:
+
+"View full schedule →"
+
+Make the CTA clearly tappable.
+
+Keep the existing peach/coral card visual style because it provides good contrast with the dark AI card.
+
+Do not unnecessarily change the card's core design.
+
+7. FIX EXCESSIVE VERTICAL WHITESPACE
+------------------------------------
+There should NOT be excessive empty space between:
+
+Next Class card
+and
+Ask Adaptive AI section.
+
+Use balanced spacing.
+
+Target approximately:
+16–20 px between the Next Class card and the next section.
+
+Do not completely eliminate the whitespace.
+
+The goal is balanced whitespace, not filling every empty area.
+
+8. ASK ADAPTIVE AI SECTION
+--------------------------
+This should remain the visual focal point of the Home screen because AI is the core differentiating feature of Adaptive AI.
+
+Keep the dark navy AI card.
+
+Maintain:
+- "YOUR ADAPTIVE AI" branding label
+- "Ask Adaptive AI"
+- Input field
+- Voice
+- Camera
+- Text actions
+
+Refine the copy slightly to feel more professional.
+
+Preferred structure:
+
+YOUR AI STUDY ASSISTANT
+
+Ask Adaptive AI
+What are you working on today?
+
+[ Ask anything...                         ↑ ]
+
+[ Voice ]    [ Camera ]    [ Text ]
+
+If changing "YOUR ADAPTIVE AI" to "YOUR AI STUDY ASSISTANT", ensure the branding "Adaptive AI" is still clearly visible elsewhere and do not weaken the app identity.
+
+If the current copy performs better with the existing product branding, you may keep:
+
+YOUR ADAPTIVE AI
+
+Ask Adaptive AI
+How can I help you today?
+
+The priority is clarity and polish, not unnecessary copy changes.
+
+9. AI INPUT
+-----------
+Make the "Ask anything..." input feel like a real interactive AI input.
+
+Requirements:
+- Clear rounded container.
+- Proper internal padding.
+- Good contrast against the dark card.
+- Send/up-arrow icon positioned consistently.
+- Comfortable touch target.
+- Text should not be vertically cramped.
+- Preserve the existing AI functionality.
+
+10. VOICE / CAMERA / TEXT ACTIONS
+---------------------------------
+Keep all three actions.
+
+They should have:
+- Equal widths.
+- Equal heights.
+- Consistent spacing.
+- Consistent icon alignment.
+- Clear labels.
+- Comfortable touch targets.
+- Strong visual hierarchy.
+
+Use:
+
+Voice
+Camera
+Text
+
+Do not add additional buttons.
+
+11. BOTTOM NAVIGATION
+---------------------
+Keep the current bottom navigation:
+
+Home
+Schedule
+AI
+History
+
+Do not redesign the navigation completely.
+
+Polish:
+- Icon alignment.
+- Label alignment.
+- Active Home state.
+- Consistent spacing.
+- Safe-area handling.
+- Touch targets.
+
+Make sure the bottom navigation doesn't feel crowded.
+
+12. OVERALL SPACING
+-------------------
+Apply a consistent spacing system throughout the Home screen.
+
+Avoid:
+- Huge empty spaces.
+- Extremely tight elements.
+- Random padding values.
+- Misaligned card edges.
+
+Cards should share consistent horizontal margins.
+
+The screen should feel visually balanced from top to bottom.
+
+13. TYPOGRAPHY
+--------------
+Improve typography hierarchy without changing the overall brand.
+
+Suggested hierarchy:
+
+ADAPTIVE AI
+→ small uppercase branding label
+
+Good morning, [Name] 👋
+→ largest/highest-priority text
+
+Supporting message
+→ smaller secondary text
+
+NEXT CLASS
+→ small uppercase section label
+
+Software Engineering
+→ strong course title
+
+YOUR AI STUDY ASSISTANT
+→ small uppercase label
+
+Ask Adaptive AI
+→ strong AI title
+
+Use appropriate font weights and line heights.
+
+Do not use too many different font sizes or weights.
+
+14. VISUAL CONSISTENCY
+----------------------
+Preserve the current color identity:
+
+- Teal/cyan for Adaptive AI branding and interactive accents.
+- Dark navy for the AI assistant card.
+- Soft peach/coral for the Next Class card.
+- Light/neutral background.
+- White/light surfaces where appropriate.
+
+Do not introduce random colors.
+
+Keep the interface clean and modern.
+
+15. DO NOT OVERDESIGN
+---------------------
+This is very important.
+
+Do NOT add:
+- Random statistics
+- Attendance cards
+- Motivation quotes
+- Weather
+- Extra dashboard widgets
+- Decorative illustrations
+- Unnecessary gradients
+- Excessive shadows
+- Excessive animations
+- Additional navigation items
+
+The existing Home screen has a good amount of content.
+
+Use whitespace intentionally.
+
+16. RESPONSIVENESS
+------------------
+Make sure the Home screen works correctly on:
+- Small Android phones
+- Standard Android phones
+- Large Android phones
+
+Avoid hard-coded absolute positioning wherever possible.
+
+Use:
+- Safe area handling
+- Flexbox
+- Responsive dimensions
+- Appropriate ScrollView behavior where necessary
+
+The bottom navigation must never overlap the content.
+
+17. ACCESSIBILITY
+-----------------
+Ensure:
+- Buttons have sufficient touch areas.
+- Text has sufficient contrast.
+- Icons have accessible labels where appropriate.
+- Important actions are clearly distinguishable.
+- Text does not get clipped on smaller screens.
+
+18. PRESERVE FUNCTIONALITY
+--------------------------
+This is critical.
+
+Do NOT break:
+- Authentication
+- User profile
+- Timetable
+- Next-class calculations
+- Schedule navigation
+- AI navigation
+- AI input
+- Voice functionality
+- Camera functionality
+- Text functionality
+- History
+- Bottom navigation
+- API calls
+- Database functionality
+- Existing state management
+
+Only improve the presentation and UX.
+
+19. FINAL VISUAL GOAL
+---------------------
+The final Home screen should feel like:
+
+"An intelligent, premium student productivity app with AI at its core."
+
+It should NOT feel like:
+- A basic university project
+- A generic chatbot
+- A template dashboard
+- An overcrowded productivity app
+
+The visual hierarchy should be:
+
+1. Adaptive AI branding
+2. Personalized greeting
+3. Next class / immediate student context
+4. Ask Adaptive AI / primary interaction
+5. Bottom navigation
+
+20. BEFORE FINISHING
+-------------------
+After implementing the changes:
+
+- Review the complete Home screen.
+- Check spacing from top to bottom.
+- Check alignment of every element.
+- Check that no excessive blank space remains above the Adaptive AI branding.
+- Check that the Next Class → AI section spacing is approximately 16–20 px.
+- Check the profile avatar alignment.
+- Check typography hierarchy.
+- Check the bottom navigation.
+- Check smaller screen sizes.
+- Fix any visual inconsistencies you find.
+
+Do not add unnecessary features.
+
+The goal is a clean, professional, production-ready Home screen while preserving the existing Adaptive AI design language and functionality.
