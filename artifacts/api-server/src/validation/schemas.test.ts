@@ -23,6 +23,6 @@ describe("timetable validation helpers", () => {
       startTime: "10:00",
       endTime: "09:00",
     });
-    assert.equal(parsed.success, true);
+    assert.equal(parsed.success, false);
   });
 });
