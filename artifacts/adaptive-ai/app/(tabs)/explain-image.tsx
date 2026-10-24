@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Image, Pressable, Text, View } from 'react-native';
+import { Image, Platform, Pressable, Text, View } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
+import { usePreferences } from '@/context/PreferencesContext';
 import { analyzeImage } from '@/services/aiService';
 import { Button, Card, ErrorBanner, Loading, Screen } from '@/components/UI';
 import { useColors } from '@/hooks/useColors';
@@ -9,6 +10,7 @@ import { useColors } from '@/hooks/useColors';
 export default function ExplainImage() {
   const colors = useColors();
   const router = useRouter();
+  const { addHistory } = usePreferences();
   const [imageUri, setImageUri] = useState('');
   const [explanation, setExplanation] = useState('');
   const [error, setError] = useState('');
@@ -16,25 +18,32 @@ export default function ExplainImage() {
 
   const chooseImage = async () => {
     setError('');
-    const selection = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      allowsEditing: false,
-      quality: 0.8,
-    });
-    if (selection.canceled) return;
-    const uri = selection.assets[0]?.uri;
-    if (!uri) {
-      setError('The selected image could not be opened. Please try another image.');
-      return;
-    }
-
-    setImageUri(uri);
-    setExplanation('');
-    setBusy(true);
     try {
-      setExplanation(await analyzeImage());
-    } catch {
-      setError('Unable to explain this image right now. Please try again.');
+      if (Platform.OS !== 'web') {
+        const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (!permission.granted) {
+          throw new Error(permission.canAskAgain
+            ? 'Photo library permission was not granted. Allow access and try again.'
+            : 'Photo library permission is blocked. Enable photo access in your device settings.');
+        }
+      }
+      const selection = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        allowsEditing: false,
+        quality: 0.8,
+      });
+      if (selection.canceled) return;
+      const asset = selection.assets[0];
+      if (!asset?.uri) throw new Error('The selected image could not be opened. Please try another image.');
+
+      setImageUri(asset.uri);
+      setExplanation('');
+      setBusy(true);
+      const response = await analyzeImage(asset.uri, asset.mimeType ?? 'image/jpeg', asset.fileName ?? 'study-image.jpg');
+      setExplanation(response);
+      addHistory({ id: Date.now().toString(), title: 'Image explanation', type: 'Camera', preview: asset.fileName ?? 'Selected study image', timestamp: 'Just now', response });
+    } catch (imageError) {
+      setError(imageError instanceof Error ? imageError.message : 'Unable to explain this image right now. Please try again.');
     } finally {
       setBusy(false);
     }

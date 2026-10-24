@@ -24,4 +24,10 @@ export interface UserProfile {
   name: string;
   email: string;
   avatarUri?: string;
+  user_metadata?: {
+    full_name?: string;
+    name?: string;
+    avatar_url?: string;
+    [key: string]: unknown;
+  };
 }

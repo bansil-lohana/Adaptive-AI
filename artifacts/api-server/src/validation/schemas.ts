@@ -109,12 +109,20 @@ export const chatBodySchema = z.object({
   conversationId: z.string().uuid().optional(),
 });
 
+export const voiceTranscriptSchema = z.object({
+  transcript: z.string().trim().min(1).max(4000),
+});
+
 export const conversationBodySchema = z.object({
   title: z.string().trim().max(120).optional(),
 });
 
 export const conversationMessageSchema = z.object({
   content: z.string().trim().min(1).max(4000),
+});
+
+export const aiPromptSchema = z.object({
+  content: z.string().trim().min(1).max(600_000),
 });
 
 export const mcqResultSchema = z.object({

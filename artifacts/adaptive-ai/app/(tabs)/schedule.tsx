@@ -1,33 +1,182 @@
-import React, { useMemo, useState } from 'react';
-import { Alert, Modal, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Alert, Modal, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { Feather } from '@expo/vector-icons';
 import { useColors } from '@/hooks/useColors';
 import { usePreferences } from '@/context/PreferencesContext';
 import { ClassSchedule } from '@/models';
-import { Button, Card, Loading, Screen, styles } from '@/components/UI';
+import { Button, Card, ErrorBanner, Loading, Screen, styles } from '@/components/UI';
 import { requestReminderPermission, scheduleClassReminder } from '@/services/notificationService';
+import { timetableApi } from '@/api/timetableApi';
+import type { TimetableEntryItem } from '@/api/timetableApi';
+import { isOfflineMockMode } from '@/api/offlineMock';
 
 const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 const formatTime = (value: string) => { const [hour, minute] = value.split(':').map(Number); const suffix = hour >= 12 ? 'PM' : 'AM'; return `${hour % 12 || 12}:${String(minute).padStart(2, '0')} ${suffix}`; };
 export default function Schedule() {
-  const colors = useColors(); const { classes, addClass, removeClass, clearClasses, semester } = usePreferences(); const [view, setView] = useState<'today' | 'week'>('today'); const [importing, setImporting] = useState(false); const [review, setReview] = useState(false); const [draft, setDraft] = useState<ClassSchedule[]>([]); const [editor, setEditor] = useState<{ type: 'new' | 'draft'; id?: string } | null>(null); const [subjectDraft, setSubjectDraft] = useState('');
+  const colors = useColors(); const { classes: localClasses, addClass, removeClass, clearClasses, semester } = usePreferences(); const [view, setView] = useState<'today' | 'week'>('today'); const [importing, setImporting] = useState(false); const [saving, setSaving] = useState(false); const [review, setReview] = useState(false); const [draft, setDraft] = useState<ClassSchedule[]>([]); const [uploadId, setUploadId] = useState<string>(); const [error, setError] = useState(''); const [remoteClasses, setRemoteClasses] = useState<ClassSchedule[] | null>(null); const [scheduleLoading, setScheduleLoading] = useState(true); const [editor, setEditor] = useState<{ type: 'new' | 'draft'; id?: string } | null>(null); const [subjectDraft, setSubjectDraft] = useState('');
+  const classes = remoteClasses ?? localClasses;
   const today = new Date().getDay(); const todays = classes.filter(item => item.dayOfWeek === today && item.enabled); const next = getNextClass(classes, new Date());
-  const importTimetable = async () => { const selected = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: .8 }); if (selected.canceled) return; setImporting(true); setTimeout(() => { setDraft([{ ...classes[0], id: `imported-${Date.now()}` }, { ...classes[1], id: `imported-db-${Date.now()}` }]); setImporting(false); setReview(true); }, 1400); };
-  const confirmReview = () => { draft.forEach(addClass); setReview(false); Alert.alert('Schedule saved', 'Your timetable is ready.'); };
+
+  useEffect(() => {
+    let cancelled = false;
+    timetableApi.getTimetable()
+      .then(entries => {
+        if (!cancelled) {
+          setRemoteClasses(entries.map(entryToSchedule));
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setRemoteClasses(null);
+      })
+      .finally(() => {
+        if (!cancelled) setScheduleLoading(false);
+      });
+    return () => { cancelled = true; };
+  }, []);
+
+  const deleteClass = async (id: string) => {
+    setError('');
+    if (remoteClasses !== null) {
+      try {
+        await timetableApi.deleteEntry(id);
+        setRemoteClasses(current => (current ?? []).filter(item => item.id !== id));
+      } catch (deleteError) {
+        setError(deleteError instanceof Error ? deleteError.message : 'Unable to remove this timetable entry.');
+      }
+      return;
+    }
+    removeClass(id);
+  };
+  const importTimetable = async () => {
+    setError('');
+    try {
+      if (Platform.OS !== 'web') {
+        const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (!permission.granted) {
+          throw new Error(permission.canAskAgain
+            ? 'Photo library permission was not granted. Allow access and try again.'
+            : 'Photo library permission is blocked. Enable photo access in your device settings.');
+        }
+      }
+      const selected = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: .8 });
+      if (selected.canceled) return;
+      const asset = selected.assets[0];
+      if (!asset?.uri) throw new Error('The selected timetable image could not be opened.');
+
+      setImporting(true);
+      const extracted = await timetableApi.extractTimetable(asset.uri, asset.mimeType ?? 'image/jpeg', asset.fileName ?? 'timetable.jpg');
+      if (!extracted.entries.length) throw new Error('No timetable entries could be read from this image. Try a clearer photo.');
+      setUploadId(extracted.uploadId);
+      setDraft(extracted.entries.map((entry, index) => ({
+        id: `draft-${index}-${Date.now()}`,
+        subject: entry.subject,
+        dayOfWeek: entry.dayOfWeek,
+        startTime: entry.startTime,
+        endTime: entry.endTime,
+        room: entry.room ?? undefined,
+        teacher: entry.teacher ?? undefined,
+        reminderMinutes: entry.reminderMinutes ?? 15,
+        semesterId: semester.id,
+        enabled: true,
+      })));
+      setReview(true);
+    } catch (importError) {
+      setError(importError instanceof Error ? importError.message : 'Unable to import this timetable right now.');
+    } finally {
+      setImporting(false);
+    }
+  };
+  const confirmReview = async () => {
+    if (!draft.length || saving) return;
+    setError('');
+    setSaving(true);
+    try {
+      const savedEntries = await timetableApi.confirmTimetable(
+        draft.map(({ subject, dayOfWeek, startTime, endTime, room, teacher, reminderMinutes }) => ({
+          subject,
+          dayOfWeek,
+          startTime,
+          endTime,
+          room: room ?? null,
+          teacher: teacher ?? null,
+          reminderMinutes,
+        })),
+        uploadId,
+      );
+      setRemoteClasses(current => [
+        ...(current ?? []),
+        ...savedEntries.map(entryToSchedule),
+      ]);
+      setReview(false);
+      setUploadId(undefined);
+    } catch (saveError) {
+      setError(saveError instanceof Error ? saveError.message : 'Unable to save this timetable right now.');
+    } finally {
+      setSaving(false);
+    }
+  };
   const editDraftSubject = (item: ClassSchedule) => { setSubjectDraft(item.subject); setEditor({ type: 'draft', id: item.id }); };
   const addManualClass = () => { setSubjectDraft(''); setEditor({ type: 'new' }); };
-  const saveSubject = () => { const subject = subjectDraft.trim(); if (!subject || !editor) return; if (editor.type === 'draft' && editor.id) setDraft(prev => prev.map(item => item.id === editor.id ? { ...item, subject } : item)); else addClass({ id: `manual-${Date.now()}`, subject, dayOfWeek: today, startTime: '16:00', endTime: '17:00', room: 'TBD', teacher: 'Add teacher', reminderMinutes: 15, semesterId: semester.id, enabled: true }); setEditor(null); };
-  const subjectEditor = <Modal visible={Boolean(editor)} transparent animationType="fade" onRequestClose={() => setEditor(null)}><View style={{ flex: 1, backgroundColor: '#00000066', alignItems: 'center', justifyContent: 'center', padding: 20 }}><View style={{ width: '100%', maxWidth: 360, backgroundColor: colors.card, borderRadius: 20, padding: 20 }}><Text style={{ color: colors.foreground, fontSize: 19, fontWeight: '700' }}>{editor?.type === 'draft' ? 'Edit subject' : 'Add class'}</Text><TextInput autoFocus value={subjectDraft} onChangeText={setSubjectDraft} placeholder="Subject name" placeholderTextColor={colors.mutedForeground} style={{ minHeight: 50, borderWidth: 1, borderColor: colors.input, borderRadius: 12, paddingHorizontal: 14, color: colors.foreground, marginTop: 16 }} /><View style={{ flexDirection: 'row', gap: 10, marginTop: 16 }}><Button label="Cancel" onPress={() => setEditor(null)} secondary /><Button label="Save" onPress={saveSubject} disabled={!subjectDraft.trim()} /></View></View></View></Modal>;
-  if (review) return <Screen title="Review your timetable" subtitle="Some information may have been extracted incorrectly. Please review before saving."><ScrollView contentContainerStyle={{ paddingBottom: 40 }}>{draft.map(item => <Pressable key={item.id} accessibilityRole="button" accessibilityLabel={`Edit ${item.subject}`} onPress={() => editDraftSubject(item)}><Card><View style={{ flexDirection: 'row', justifyContent: 'space-between' }}><View style={{ flex: 1 }}><Text style={{ color: colors.primary, fontSize: 12, fontWeight: '700' }}>{days[item.dayOfWeek].toUpperCase()}</Text><Text style={{ color: colors.foreground, fontSize: 18, fontWeight: '700', marginTop: 7 }}>{item.subject}</Text><Text style={{ color: colors.foreground, marginTop: 6 }}>{formatTime(item.startTime)} – {formatTime(item.endTime)}</Text><Text style={{ color: colors.mutedForeground, marginTop: 4 }}>{item.room} · {item.teacher}</Text></View><Pressable accessibilityLabel={`Delete ${item.subject}`} onPress={() => setDraft(prev => prev.filter(candidate => candidate.id !== item.id))}><Feather name="trash-2" size={19} color={colors.destructive} /></Pressable></View></Card></Pressable>)}<View style={{ marginTop: 18, gap: 11 }}><Button label="Confirm and save" icon="check" onPress={confirmReview} /><Button label="Add missing class" icon="plus" secondary onPress={() => setDraft(prev => [...prev, { id: `new-${Date.now()}`, subject: 'New class', dayOfWeek: today, startTime: '16:00', endTime: '17:00', room: 'TBD', teacher: 'Add teacher', reminderMinutes: 15, semesterId: semester.id, enabled: true }])} /></View></ScrollView>{subjectEditor}</Screen>;
+  const saveSubject = async () => {
+    const subject = subjectDraft.trim();
+    if (!subject || !editor || saving) return;
+    if (editor.type === 'draft' && editor.id) {
+      setDraft(prev => prev.map(item => item.id === editor.id ? { ...item, subject } : item));
+      setEditor(null);
+      return;
+    }
+    if (remoteClasses !== null) {
+      setSaving(true);
+      setError('');
+      try {
+        const created = await timetableApi.createEntry({
+          subject,
+          dayOfWeek: today,
+          startTime: '16:00',
+          endTime: '17:00',
+          room: 'TBD',
+          teacher: null,
+          reminderMinutes: 15,
+        });
+        setRemoteClasses(current => [...(current ?? []), entryToSchedule(created)]);
+        setEditor(null);
+      } catch (saveError) {
+        setError(saveError instanceof Error ? saveError.message : 'Unable to add this timetable entry.');
+      } finally {
+        setSaving(false);
+      }
+      return;
+    }
+    addClass({ id: `manual-${Date.now()}`, subject, dayOfWeek: today, startTime: '16:00', endTime: '17:00', room: 'TBD', teacher: 'Add teacher', reminderMinutes: 15, semesterId: semester.id, enabled: true });
+    setEditor(null);
+  };
+  const subjectEditor = <Modal visible={Boolean(editor)} transparent animationType="fade" onRequestClose={() => setEditor(null)}><View style={{ flex: 1, backgroundColor: '#00000066', alignItems: 'center', justifyContent: 'center', padding: 20 }}><View style={{ width: '100%', maxWidth: 360, backgroundColor: colors.card, borderRadius: 20, padding: 20 }}><Text style={{ color: colors.foreground, fontSize: 19, fontWeight: '700' }}>{editor?.type === 'draft' ? 'Edit subject' : 'Add class'}</Text><TextInput autoFocus value={subjectDraft} onChangeText={setSubjectDraft} placeholder="Subject name" placeholderTextColor={colors.mutedForeground} style={{ minHeight: 50, borderWidth: 1, borderColor: colors.input, borderRadius: 12, paddingHorizontal: 14, color: colors.foreground, marginTop: 16 }} /><View style={{ flexDirection: 'row', gap: 10, marginTop: 16 }}><Button label="Cancel" onPress={() => setEditor(null)} secondary /><Button label={saving ? 'Saving...' : 'Save'} onPress={saveSubject} disabled={!subjectDraft.trim() || saving} /></View></View></View></Modal>;
+  if (review) return <Screen title="Review your timetable" subtitle="Some information may have been extracted incorrectly. Please review before saving.">{isOfflineMockMode() ? <Text style={{ color: colors.mutedForeground, fontSize: 12, marginBottom: 8 }}>Offline demo sample only — this is not extracted from your image.</Text> : null}<ErrorBanner message={error} /><ScrollView contentContainerStyle={{ paddingBottom: 40 }}>{draft.map(item => <Pressable key={item.id} accessibilityRole="button" accessibilityLabel={`Edit ${item.subject}`} onPress={() => editDraftSubject(item)}><Card><View style={{ flexDirection: 'row', justifyContent: 'space-between' }}><View style={{ flex: 1 }}><Text style={{ color: colors.primary, fontSize: 12, fontWeight: '700' }}>{days[item.dayOfWeek].toUpperCase()}</Text><Text style={{ color: colors.foreground, fontSize: 18, fontWeight: '700', marginTop: 7 }}>{item.subject}</Text><Text style={{ color: colors.foreground, marginTop: 6 }}>{formatTime(item.startTime)} – {formatTime(item.endTime)}</Text><Text style={{ color: colors.mutedForeground, marginTop: 4 }}>{item.room} · {item.teacher}</Text></View><Pressable accessibilityLabel={`Delete ${item.subject}`} onPress={() => setDraft(prev => prev.filter(candidate => candidate.id !== item.id))}><Feather name="trash-2" size={19} color={colors.destructive} /></Pressable></View></Card></Pressable>)}<View style={{ marginTop: 18, gap: 11 }}><Button label={saving ? 'Saving timetable...' : 'Confirm and save'} icon="check" onPress={confirmReview} disabled={saving || !draft.length} /><Button label="Add missing class" icon="plus" secondary onPress={() => setDraft(prev => [...prev, { id: `new-${Date.now()}`, subject: 'New class', dayOfWeek: today, startTime: '16:00', endTime: '17:00', room: 'TBD', teacher: 'Add teacher', reminderMinutes: 15, semesterId: semester.id, enabled: true }])} /></View></ScrollView>{subjectEditor}</Screen>;
   if (importing) return <Screen title="Analyzing timetable..." subtitle="Adaptive AI is organizing your classes."><Card><Loading label="Reading timetable" /><Text style={{ color: colors.mutedForeground, marginTop: 8 }}>Detecting subjects, days, times, and rooms…</Text></Card></Screen>;
-  return <Screen title="My Schedule" subtitle="Never miss your next class."><ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 110 }}>
+  return <Screen title="My Schedule" subtitle="Never miss your next class.">{isOfflineMockMode() ? <Text style={{ color: colors.mutedForeground, fontSize: 12, marginBottom: 8 }}>Offline demo — timetable changes are saved on this device.</Text> : null}<ErrorBanner message={error} /><ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 110 }}>
+    <Card style={{ marginTop: 12, paddingVertical: 11 }}><Text style={{ color: colors.mutedForeground, fontSize: 13 }}>{scheduleLoading ? 'Loading your account timetable…' : remoteClasses === null ? 'Device-only timetable; these entries are not confirmed as saved to your account.' : remoteClasses.length ? 'Showing timetable records saved to your account.' : 'No timetable records are saved to your account yet.'}</Text></Card>
+    {scheduleLoading ? <Loading label="Loading your timetable…" /> : null}
     <View style={{ flexDirection: 'row', backgroundColor: colors.secondary, borderRadius: 14, padding: 4, marginTop: 20 }}><Pressable onPress={() => setView('today')} style={{ flex: 1, alignItems: 'center', padding: 11, borderRadius: 11, backgroundColor: view === 'today' ? colors.card : 'transparent' }}><Text style={{ color: colors.foreground, fontWeight: '700' }}>Today</Text></Pressable><Pressable onPress={() => setView('week')} style={{ flex: 1, alignItems: 'center', padding: 11, borderRadius: 11, backgroundColor: view === 'week' ? colors.card : 'transparent' }}><Text style={{ color: colors.foreground, fontWeight: '700' }}>Week</Text></Pressable></View>
      {next && <Card style={{ backgroundColor: '#102B3F', borderColor: '#102B3F' }}><Text style={{ color: '#7EE5D5', fontSize: 11, letterSpacing: 1.4, fontWeight: '700' }}>NEXT CLASS · {days[next.dayOfWeek].toUpperCase()}</Text><Text style={{ color: '#FFF', fontSize: 23, fontWeight: '700', marginTop: 10 }}>{next.subject}</Text><Text style={{ color: '#D9EEEC', fontSize: 16, marginTop: 8 }}>{formatTime(next.startTime)} – {formatTime(next.endTime)}</Text><View style={{ flexDirection: 'row', gap: 7, alignItems: 'center', marginTop: 13 }}><Feather name="map-pin" size={15} color="#7EE5D5" /><Text style={{ color: '#B9D0D2' }}>{next.room} · {next.teacher}</Text></View><Text style={{ color: '#7EE5D5', fontWeight: '700', marginTop: 17 }}>Starts next in your timetable</Text></Card>}
-    {view === 'today' ? <><Text style={[styles.sectionTitle, { color: colors.foreground }]}>Today's classes</Text>{todays.length ? todays.map(item => <ClassRow key={item.id} item={item} onDelete={() => removeClass(item.id)} />) : <Card style={{ alignItems: 'center', paddingVertical: 26 }}><Feather name="coffee" size={25} color={colors.primary} /><Text style={{ color: colors.foreground, fontWeight: '700', marginTop: 10 }}>No classes today</Text><Text style={{ color: colors.mutedForeground, marginTop: 4 }}>A little room to breathe.</Text></Card>}</> : <><Text style={[styles.sectionTitle, { color: colors.foreground }]}>Weekly timetable</Text><View style={{ flexDirection: 'row', gap: 10 }}>{days.slice(1).map((day, index) => <View key={day} style={{ width: 122 }}><Text style={{ color: colors.primary, fontWeight: '700', marginBottom: 8 }}>{day.slice(0, 3)}</Text>{classes.filter(item => item.dayOfWeek === index + 1).map(item => <Card key={item.id} style={{ marginTop: 0, marginBottom: 8, padding: 12 }}><Text style={{ color: colors.foreground, fontWeight: '700', fontSize: 13 }}>{item.subject}</Text><Text style={{ color: colors.mutedForeground, fontSize: 11, marginTop: 6 }}>{formatTime(item.startTime)}</Text><Text style={{ color: colors.mutedForeground, fontSize: 11 }}>{item.room}</Text></Card>)}</View>)}</View></>}
+    {view === 'today' ? <><Text style={[styles.sectionTitle, { color: colors.foreground }]}>Today's classes</Text>{todays.length ? todays.map(item => <ClassRow key={item.id} item={item} onDelete={() => deleteClass(item.id)} />) : <Card style={{ alignItems: 'center', paddingVertical: 26 }}><Feather name="coffee" size={25} color={colors.primary} /><Text style={{ color: colors.foreground, fontWeight: '700', marginTop: 10 }}>No classes today</Text><Text style={{ color: colors.mutedForeground, marginTop: 4 }}>A little room to breathe.</Text></Card>}</> : <><Text style={[styles.sectionTitle, { color: colors.foreground }]}>Weekly timetable</Text><View style={{ flexDirection: 'row', gap: 10 }}>{days.slice(1).map((day, index) => <View key={day} style={{ width: 122 }}><Text style={{ color: colors.primary, fontWeight: '700', marginBottom: 8 }}>{day.slice(0, 3)}</Text>{classes.filter(item => item.dayOfWeek === index + 1).map(item => <Card key={item.id} style={{ marginTop: 0, marginBottom: 8, padding: 12 }}><Text style={{ color: colors.foreground, fontWeight: '700', fontSize: 13 }}>{item.subject}</Text><Text style={{ color: colors.mutedForeground, fontSize: 11, marginTop: 6 }}>{formatTime(item.startTime)}</Text><Text style={{ color: colors.mutedForeground, fontSize: 11 }}>{item.room}</Text></Card>)}</View>)}</View></>}
      <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Manage timetable</Text><View style={{ gap: 11 }}><Button label="Import timetable" icon="upload" onPress={importTimetable} /><Button label="Add class manually" icon="plus" secondary onPress={addManualClass} /><Button label="Enable class reminders" icon="bell" secondary onPress={async () => { if (!next) { Alert.alert('Add a class first', 'There are no classes available to schedule reminders for.'); return; } if (await requestReminderPermission()) { await scheduleClassReminder(next); Alert.alert('Reminders enabled', 'Adaptive AI will help you stay on time.'); } }} /></View>
-    {classes.length > 0 && <Pressable accessibilityLabel="Clear timetable" onPress={() => Alert.alert('Clear timetable?', 'This removes all saved classes.', [{ text: 'Cancel', style: 'cancel' }, { text: 'Clear timetable', style: 'destructive', onPress: clearClasses }])} style={{ alignItems: 'center', padding: 18 }}><Text style={{ color: colors.destructive, fontWeight: '700' }}>Clear timetable</Text></Pressable>}
+    {classes.length > 0 && remoteClasses === null && <Pressable accessibilityLabel="Clear device timetable" onPress={() => Alert.alert('Clear device timetable?', 'This removes classes saved only on this device.', [{ text: 'Cancel', style: 'cancel' }, { text: 'Clear timetable', style: 'destructive', onPress: clearClasses }])} style={{ alignItems: 'center', padding: 18 }}><Text style={{ color: colors.destructive, fontWeight: '700' }}>Clear device timetable</Text></Pressable>}
    </ScrollView>{subjectEditor}</Screen>;
 }
 function ClassRow({ item, onDelete }: { item: ClassSchedule; onDelete: () => void }) { const colors = useColors(); return <Card style={{ flexDirection: 'row', alignItems: 'center', padding: 15 }}><View style={{ width: 58 }}><Text style={{ color: colors.primary, fontWeight: '700' }}>{formatTime(item.startTime)}</Text><Text style={{ color: colors.mutedForeground, fontSize: 11, marginTop: 4 }}>{formatTime(item.endTime)}</Text></View><View style={{ width: 1, height: 43, backgroundColor: colors.border, marginHorizontal: 13 }} /><View style={{ flex: 1 }}><Text style={{ color: colors.foreground, fontWeight: '700' }}>{item.subject}</Text><Text style={{ color: colors.mutedForeground, fontSize: 12, marginTop: 4 }}>{item.room} · {item.teacher}</Text><Text style={{ color: colors.primary, fontSize: 12, marginTop: 5 }}>Upcoming</Text></View><Pressable accessibilityLabel={`Delete ${item.subject}`} onPress={onDelete}><Feather name="trash-2" size={18} color={colors.mutedForeground} /></Pressable></Card>; }
+function entryToSchedule(entry: TimetableEntryItem): ClassSchedule {
+  return {
+    id: entry.id,
+    subject: entry.subject,
+    dayOfWeek: entry.dayOfWeek,
+    startTime: entry.startTime,
+    endTime: entry.endTime,
+    room: entry.room ?? undefined,
+    teacher: entry.teacher ?? undefined,
+    reminderMinutes: entry.reminderMinutes,
+    semesterId: entry.semester ?? 'current',
+    enabled: entry.enabled,
+  };
+}
 function getNextClass(items: ClassSchedule[], now: Date) { const nowMinutes = now.getHours() * 60 + now.getMinutes(); return items.filter(item => item.enabled).map(item => { const [hour, minute] = item.startTime.split(':').map(Number); const offset = (item.dayOfWeek - now.getDay() + 7) % 7; const startMinutes = hour * 60 + minute; const order = offset === 0 && startMinutes <= nowMinutes ? 7 * 24 * 60 + startMinutes : offset * 24 * 60 + startMinutes; return { item, order }; }).sort((a, b) => a.order - b.order)[0]?.item; }

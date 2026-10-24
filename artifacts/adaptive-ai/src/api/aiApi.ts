@@ -1,3 +1,4 @@
+import { Platform } from 'react-native';
 import { apiRequest, apiUpload } from './client';
 
 export interface ChatResponse {
@@ -96,5 +97,65 @@ export const aiApi = {
       method: 'POST',
       body: JSON.stringify({ content }),
     });
+  },
+
+  async generateText(content: string): Promise<{ answer: string }> {
+    return apiRequest<{ answer: string }>('/api/ai/generate', {
+      method: 'POST',
+      body: JSON.stringify({ content }),
+    });
+  },
+
+  async explainImage(
+    imageUri: string,
+    mimeType = 'image/jpeg',
+    fileName = 'study-image.jpg',
+  ): Promise<{ answer: string }> {
+    const formData = new FormData();
+    if (Platform.OS === 'web') {
+      const response = await fetch(imageUri);
+      if (!response.ok) throw new Error('Unable to read the selected image for upload.');
+      const image = await response.blob();
+      const uploadBlob = image.type === mimeType ? image : new Blob([image], { type: mimeType });
+      formData.append('image', uploadBlob, fileName);
+    } else {
+      formData.append('image', {
+        uri: imageUri,
+        type: mimeType,
+        name: fileName,
+      } as unknown as Blob);
+    }
+    return apiUpload<{ answer: string }>('/api/ai/vision', formData);
+  },
+
+  async askVoice(
+    audioUri: string,
+    mimeType = 'audio/mp4',
+    fileName = 'voice-question.m4a',
+  ): Promise<{ answer: string }> {
+    const formData = new FormData();
+    formData.append('audio', {
+      uri: audioUri,
+      type: mimeType,
+      name: fileName,
+    } as unknown as Blob);
+    return apiUpload<{ answer: string }>('/api/ai/voice', formData);
+  },
+
+  async askVoiceTranscript(transcript: string): Promise<{ answer: string }> {
+    return apiRequest<{ answer: string }>('/api/ai/voice', {
+      method: 'POST',
+      body: JSON.stringify({ transcript }),
+    });
+  },
+
+  async askVoiceBlob(
+    audio: Blob,
+    mimeType = audio.type || 'audio/webm',
+    fileName = 'voice-question.webm',
+  ): Promise<{ answer: string }> {
+    const formData = new FormData();
+    formData.append('audio', audio, fileName);
+    return apiUpload<{ answer: string }>('/api/ai/voice', formData);
   },
 };

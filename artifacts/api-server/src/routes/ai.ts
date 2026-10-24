@@ -14,9 +14,17 @@ import {
   conversationBodySchema,
   conversationMessageSchema,
   DAY_NAMES,
+  aiPromptSchema,
   uuidParam,
+  voiceTranscriptSchema,
 } from "../validation/schemas";
-import { analyzeMcqImage, answerWithContext, generateText } from "../services/geminiService";
+import {
+  analyzeMcqImage,
+  answerFromAudioWithFallback,
+  answerWithContext,
+  explainStudyImage,
+  generateText,
+} from "../services/geminiService";
 import { getNextClass, listEntries, serializeEntry } from "../services/timetableService";
 import { buckets, uploadPrivateFile } from "../services/storageService";
 
@@ -267,15 +275,80 @@ router.post(
 );
 
 router.post(
+  ["/image", "/vision"],
+  aiRateLimit,
+  upload.single("image"),
+  asyncHandler(async (req, res) => {
+    requireUser(req);
+    const file = req.file;
+    if (!file) throw errors.validation("An image is required");
+    if (!file.mimetype.startsWith("image/")) {
+      throw errors.validation("Upload an image to explain");
+    }
+
+    const answer = await explainStudyImage({
+      mimeType: file.mimetype,
+      data: file.buffer.toString("base64"),
+    });
+    sendSuccess(res, { answer });
+  }),
+);
+
+router.post(
+  "/voice",
+  aiRateLimit,
+  upload.single("audio"),
+  asyncHandler(async (req, res) => {
+    requireUser(req);
+    const file = req.file;
+    const transcriptInput = req.body?.transcript === undefined
+      ? null
+      : voiceTranscriptSchema.parse({ transcript: req.body.transcript });
+    if (!file && !transcriptInput) {
+      throw errors.validation("Provide an audio recording or voice transcript");
+    }
+    if (file && !file.mimetype.startsWith("audio/")) {
+      throw errors.validation("Upload a supported audio recording");
+    }
+
+    let answer: string;
+    if (transcriptInput) {
+      answer = await answerWithContext(
+        `The student spoke this voice transcript. Answer their request clearly and practically:\n\n${transcriptInput.transcript}`,
+      );
+    } else if (file) {
+      answer = await answerFromAudioWithFallback({
+        mimeType: file.mimetype,
+        data: file.buffer.toString("base64"),
+      });
+    } else {
+      throw errors.validation("Provide an audio recording or voice transcript");
+    }
+    sendSuccess(res, { answer });
+  }),
+);
+
+router.post(
   "/explain",
   aiRateLimit,
   asyncHandler(async (req, res) => {
     const user = requireUser(req);
-    const body = conversationMessageSchema.parse(req.body);
+    const body = aiPromptSchema.parse(req.body);
     const answer = await generateText(
       `Explain this for a university student in clear language:\n\n${body.content}`,
     );
     sendSuccess(res, { answer, userId: user.id });
+  }),
+);
+
+router.post(
+  "/generate",
+  aiRateLimit,
+  asyncHandler(async (req, res) => {
+    requireUser(req);
+    const body = aiPromptSchema.parse(req.body);
+    const answer = await generateText(body.content);
+    sendSuccess(res, { answer });
   }),
 );
 

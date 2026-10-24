@@ -1,7 +1,14 @@
+import { Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import { ClassSchedule } from '@/models';
 
 export async function requestReminderPermission() {
+  if (Platform.OS === 'android') {
+    await Notifications.setNotificationChannelAsync('default', {
+      name: 'Class reminders',
+      importance: Notifications.AndroidImportance.DEFAULT,
+    });
+  }
   const current = await Notifications.getPermissionsAsync();
   if (current.granted) return true;
   const requested = await Notifications.requestPermissionsAsync();
@@ -22,6 +29,6 @@ export async function scheduleClassReminder(item: ClassSchedule) {
   if (reminderDate.getTime() <= now.getTime()) return;
   await Notifications.scheduleNotificationAsync({
     content: { title: 'Upcoming class', body: `${item.subject} starts in ${item.reminderMinutes} minutes.\n${item.room ?? 'Room to be announced'}` },
-    trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: reminderDate },
+    trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: reminderDate, channelId: 'default' },
   });
 }

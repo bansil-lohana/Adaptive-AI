@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { UserProfile } from '@/models';
-import { DEMO_ACCOUNT } from '@/config/auth';
+import { getSupabaseClient } from './supabaseClient';
 
 const SESSION_STORAGE_KEY = 'adaptive_supabase_session';
 
@@ -53,10 +53,36 @@ class SupabaseAuthService {
    */
   async restoreSession(): Promise<{ user: UserProfile | null; session: SupabaseSession | null }> {
     try {
+      if (this.isConfigured()) {
+        const { data, error } = await getSupabaseClient().auth.getSession();
+        if (error) throw error;
+        if (data.session) {
+          const session: SupabaseSession = {
+            access_token: data.session.access_token,
+            refresh_token: data.session.refresh_token,
+            expires_at:
+              data.session.expires_at ??
+              Math.floor(Date.now() / 1000) + data.session.expires_in,
+            token_type: data.session.token_type,
+            user: {
+              id: data.session.user.id,
+              email: data.session.user.email ?? '',
+              user_metadata: data.session.user.user_metadata,
+            },
+          };
+          await this.persistSession(session);
+          return { user: this.mapToProfile(session.user), session };
+        }
+      }
+
       const raw = await AsyncStorage.getItem(SESSION_STORAGE_KEY);
       if (!raw) return { user: null, session: null };
       const parsed = JSON.parse(raw) as SupabaseSession;
       if (!parsed?.access_token || !parsed.user?.id) {
+        await AsyncStorage.removeItem(SESSION_STORAGE_KEY);
+        return { user: null, session: null };
+      }
+      if (parsed.access_token.startsWith('mock-')) {
         await AsyncStorage.removeItem(SESSION_STORAGE_KEY);
         return { user: null, session: null };
       }
@@ -109,24 +135,11 @@ class SupabaseAuthService {
   async signIn(email: string, password: string): Promise<AuthResult> {
     const cleanEmail = email.trim().toLowerCase();
 
-    // Fallback if Supabase credentials are not configured yet in demo mode
     if (!this.isConfigured()) {
-      if (cleanEmail === DEMO_ACCOUNT.email.toLowerCase() && password === DEMO_ACCOUNT.password) {
-        const dummySession: SupabaseSession = {
-          access_token: 'mock-access-token-demo',
-          refresh_token: 'mock-refresh-token-demo',
-          expires_at: Math.floor(Date.now() / 1000) + 86400 * 30,
-          token_type: 'bearer',
-          user: {
-            id: 'demo-account',
-            email: DEMO_ACCOUNT.email,
-            user_metadata: { full_name: DEMO_ACCOUNT.name },
-          },
-        };
-        await this.persistSession(dummySession);
-        return { ok: true, user: this.mapToProfile(dummySession.user), session: dummySession };
-      }
-      return { ok: false, message: 'Invalid email or password.' };
+      return {
+        ok: false,
+        message: 'Sign-in is not configured. Set EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY.',
+      };
     }
 
     try {
@@ -170,19 +183,10 @@ class SupabaseAuthService {
     const cleanName = name.trim();
 
     if (!this.isConfigured()) {
-      const dummySession: SupabaseSession = {
-        access_token: `mock-token-${Date.now()}`,
-        refresh_token: `mock-refresh-${Date.now()}`,
-        expires_at: Math.floor(Date.now() / 1000) + 86400 * 30,
-        token_type: 'bearer',
-        user: {
-          id: `local-user-${Date.now()}`,
-          email: cleanEmail,
-          user_metadata: { full_name: cleanName },
-        },
+      return {
+        ok: false,
+        message: 'Account creation is not configured. Set EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY.',
       };
-      await this.persistSession(dummySession);
-      return { ok: true, user: this.mapToProfile(dummySession.user), session: dummySession };
     }
 
     try {
@@ -202,7 +206,34 @@ class SupabaseAuthService {
         }),
       });
 
-      const data = await res.json();
+      const contentType = res.headers.get('content-type')?.split(';', 1)[0].trim().toLowerCase();
+      if (!contentType?.includes('json')) {
+        return {
+          ok: false,
+          message: `Authentication service returned an unexpected response (HTTP ${res.status}, ${contentType || 'unknown content type'}). Please try again later.`,
+        };
+      }
+
+      let data: {
+        access_token?: string;
+        refresh_token?: string;
+        expires_at?: number;
+        expires_in?: number;
+        token_type?: string;
+        user?: SupabaseSession['user'] | null;
+        error_description?: string;
+        msg?: string;
+        message?: string;
+      };
+      try {
+        data = await res.json();
+      } catch {
+        return {
+          ok: false,
+          message: `Authentication service returned invalid JSON (HTTP ${res.status}). Please try again later.`,
+        };
+      }
+
       if (!res.ok) {
         return {
           ok: false,
@@ -211,7 +242,7 @@ class SupabaseAuthService {
       }
 
       // If Supabase confirms immediately or auto-confirms
-      if (data.access_token && data.user) {
+      if (data.access_token && data.refresh_token && data.user?.id) {
         const session: SupabaseSession = {
           access_token: data.access_token,
           refresh_token: data.refresh_token,
@@ -224,7 +255,7 @@ class SupabaseAuthService {
       }
 
       // Email confirmation required or user created
-      if (data.user) {
+      if (data.user?.id) {
         return {
           ok: true,
           message: 'Account created! Please check your email to confirm your account or sign in.',
@@ -232,7 +263,10 @@ class SupabaseAuthService {
         };
       }
 
-      return { ok: false, message: 'Unexpected response from authentication service.' };
+      return {
+        ok: false,
+        message: 'This email may already be registered. Try signing in or resetting your password.',
+      };
     } catch {
       return { ok: false, message: 'Network error. Unable to create account.' };
     }
@@ -368,6 +402,11 @@ class SupabaseAuthService {
     this.session = null;
     await AsyncStorage.removeItem(SESSION_STORAGE_KEY);
 
+    if (this.isConfigured()) {
+      const { error } = await getSupabaseClient().auth.signOut({ scope: 'local' });
+      if (error) throw error;
+    }
+
     if (this.isConfigured() && token) {
       try {
         await fetch(`${this.supabaseUrl}/auth/v1/logout`, {
@@ -390,18 +429,21 @@ class SupabaseAuthService {
 
   private mapToProfile(user?: SupabaseSession['user']): UserProfile {
     if (!user) {
-      return { id: '', name: 'Student', email: '' };
+      return { id: '', name: 'User', email: '' };
     }
+    const metadata = user.user_metadata;
+    const emailPrefix = user.email?.split('@')[0]?.trim();
     const name =
-      user.user_metadata?.full_name ||
-      user.user_metadata?.name ||
-      user.email?.split('@')[0] ||
-      'Student';
+      (typeof metadata?.full_name === 'string' && metadata.full_name.trim()) ||
+      (typeof metadata?.name === 'string' && metadata.name.trim()) ||
+      (emailPrefix ? `${emailPrefix.charAt(0).toUpperCase()}${emailPrefix.slice(1).toLowerCase()}` : '') ||
+      'User';
     return {
       id: user.id,
       name,
       email: user.email || '',
       avatarUri: user.user_metadata?.avatar_url as string | undefined,
+      user_metadata: metadata,
     };
   }
 }

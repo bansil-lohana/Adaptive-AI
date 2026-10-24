@@ -79,13 +79,14 @@ function ClassicTabLayout() {
         }}
       />
       <Tabs.Screen name="schedule" options={{ title: 'Schedule', tabBarIcon: ({ color }) => <Feather name="calendar" size={22} color={color} /> }} />
-      <Tabs.Screen name="assistant" options={{ title: 'AI', tabBarIcon: ({ color }) => <Feather name="message-circle" size={22} color={color} /> }} />
+      <Tabs.Screen name="assistant" options={{ title: 'AI', href: { pathname: '/(tabs)/assistant', params: { mode: 'text' } }, tabBarIcon: ({ color }) => <Feather name="message-circle" size={22} color={color} /> }} />
       <Tabs.Screen name="history" options={{ title: 'History', tabBarIcon: ({ color }) => <Feather name="clock" size={22} color={color} /> }} />
       <Tabs.Screen name="profile" options={{ href: null }} />
       <Tabs.Screen name="camera" options={{ href: null, tabBarStyle: { display: 'none' } }} />
       <Tabs.Screen name="explain-image" options={{ href: null }} />
       <Tabs.Screen name="read-text" options={{ href: null }} />
       <Tabs.Screen name="summarize-file" options={{ href: null }} />
+      <Tabs.Screen name="translate" options={{ href: null }} />
       <Tabs.Screen name="settings" options={{ href: null }} />
     </Tabs>
   );

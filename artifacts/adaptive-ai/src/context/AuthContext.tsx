@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useMemo, useState } from '
 import { UserProfile } from '@/models';
 import { AUTH_MODE } from '@/config/auth';
 import { authService, AuthResult } from '@/services/auth/AuthService';
+import { isOfflineMockMode } from '@/api/offlineMock';
 
 type AuthContextValue = {
   user: UserProfile | null;
@@ -14,42 +15,86 @@ type AuthContextValue = {
   updateProfile: (patch: Partial<Pick<UserProfile, 'name' | 'avatarUri'>>) => Promise<AuthResult>;
   changePassword: (current: string, next: string) => Promise<AuthResult>;
   signOut: () => Promise<void>;
+  refreshSession: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
+
+function normalizeUserProfile(profile: UserProfile | null): UserProfile | null {
+  if (!profile) return null;
+  const emailPrefix = profile.email?.split('@')[0]?.trim();
+  const name =
+    profile.user_metadata?.full_name?.trim() ||
+    profile.user_metadata?.name?.trim() ||
+    profile.name?.trim() ||
+    (emailPrefix ? `${emailPrefix.charAt(0).toUpperCase()}${emailPrefix.slice(1).toLowerCase()}` : '') ||
+    'User';
+  return { ...profile, name };
+}
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    authService.restore().then(result => setUser(result.user)).catch(() => undefined).finally(() => setIsLoading(false));
+    if (isOfflineMockMode()) {
+      setUser(normalizeUserProfile({ id: 'offline-demo-user', name: 'Offline Student', email: 'student@example.test' }));
+      setIsLoading(false);
+      return;
+    }
+    authService.restore().then(result => setUser(normalizeUserProfile(result.user))).catch(() => undefined).finally(() => setIsLoading(false));
   }, []);
 
   const signIn = async (email: string, password: string) => {
+    if (isOfflineMockMode()) {
+      const demoUser = { id: 'offline-demo-user', name: 'Offline Student', email };
+      setUser(normalizeUserProfile(demoUser));
+      return { ok: true, user: demoUser };
+    }
     const result = await authService.signIn(email, password);
-    if (result.user) setUser(result.user);
+    if (result.user) setUser(normalizeUserProfile(result.user));
     return result;
   };
+  const refreshSession = async () => {
+    const result = await authService.restore();
+    setUser(normalizeUserProfile(result.user));
+  };
   const signUp = async (name: string, email: string, password: string) => {
+    if (isOfflineMockMode()) {
+      const demoUser = { id: 'offline-demo-user', name: name || 'Offline Student', email };
+      setUser(normalizeUserProfile(demoUser));
+      return { ok: true, user: demoUser };
+    }
     const result = await authService.signUp(name, email, password);
-    if (result.user) setUser(result.user);
+    if (result.user) setUser(normalizeUserProfile(result.user));
     return result;
   };
   const updateProfile = async (patch: Partial<Pick<UserProfile, 'name' | 'avatarUri'>>) => {
     if (!user) return { ok: false, message: 'Your session has expired. Please sign in again.' };
+    if (isOfflineMockMode()) {
+      const updatedUser = { ...user, ...patch };
+      setUser(normalizeUserProfile(updatedUser));
+      return { ok: true, user: updatedUser };
+    }
     const result = await authService.updateProfile(user.email, patch);
-    if (result.user) setUser(result.user);
+    if (result.user) setUser(normalizeUserProfile(result.user));
     return result;
   };
   const changePassword = async (current: string, next: string) => {
     if (!user) return { ok: false, message: 'Your session has expired. Please sign in again.' };
+    if (isOfflineMockMode()) return { ok: false, message: 'Password changes are unavailable in offline demo mode.' };
     const result = await authService.changePassword(user.email, current, next);
-    if (result.user) setUser(result.user);
+    if (result.user) setUser(normalizeUserProfile(result.user));
     return result;
   };
-  const signOut = async () => { await authService.signOut(); setUser(null); };
-  const value = useMemo(() => ({ user, isLoading, authMode: AUTH_MODE, signIn, signUp, requestPasswordReset: authService.requestPasswordReset.bind(authService), resetPassword: authService.resetPassword.bind(authService), updateProfile, changePassword, signOut }), [user, isLoading]);
+  const signOut = async () => {
+    try {
+      if (!isOfflineMockMode()) await authService.signOut();
+    } finally {
+      setUser(null);
+    }
+  };
+  const value = useMemo(() => ({ user, isLoading, authMode: AUTH_MODE, signIn, signUp, requestPasswordReset: authService.requestPasswordReset.bind(authService), resetPassword: authService.resetPassword.bind(authService), updateProfile, changePassword, signOut, refreshSession }), [user, isLoading]);
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 

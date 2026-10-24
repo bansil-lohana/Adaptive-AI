@@ -23,6 +23,12 @@ export const errors = {
   conflict: (message: string) => new AppError(409, "CONFLICT", message),
   payload: (message: string) => new AppError(413, "PAYLOAD_TOO_LARGE", message),
   gemini: (message: string) => new AppError(502, "AI_PROVIDER_ERROR", message),
+  geminiRateLimited: () =>
+    new AppError(
+      429,
+      "AI_RATE_LIMITED",
+      "The AI service is temporarily rate-limited. Please try again later.",
+    ),
   database: (message = "A database error occurred") =>
     new AppError(500, "DATABASE_ERROR", message),
   storage: (message = "File storage failed") => new AppError(500, "STORAGE_ERROR", message),

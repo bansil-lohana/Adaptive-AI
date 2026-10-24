@@ -1,10 +1,9 @@
 import { z } from "zod";
 import { logger } from "../lib/logger";
-import { errors } from "../lib/errors";
+import { AppError, errors } from "../lib/errors";
 import { extractedTimetableSchema, mcqResultSchema } from "../validation/schemas";
 
-const DEFAULT_MODEL = process.env.GEMINI_MODEL || "gemini-2.0-flash";
-const TIMEOUT_MS = 35_000;
+const TIMEOUT_MS = 60_000;
 
 type GeminiPart =
   | { text: string }
@@ -61,7 +60,7 @@ async function sleep(ms: number): Promise<void> {
 
 async function generateContent(parts: GeminiPart[], attempts = 3): Promise<string> {
   const apiKey = getApiKey();
-  const model = DEFAULT_MODEL;
+  const model = process.env.GEMINI_MODEL || "gemini-1.5-flash";
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
   let lastError: unknown;
 
@@ -83,12 +82,13 @@ async function generateContent(parts: GeminiPart[], attempts = 3): Promise<strin
       });
       const payload = (await response.json()) as GeminiResponse;
       if (!response.ok) {
-        const message = payload.error?.message || `Gemini request failed (${response.status})`;
         if (isRetryable(response.status) && attempt < attempts) {
           logger.warn({ status: response.status, attempt }, "Retrying Gemini request");
           await sleep(400 * 2 ** (attempt - 1));
           continue;
         }
+        if (response.status === 429) throw errors.geminiRateLimited();
+        const message = payload.error?.message || `Gemini request failed (${response.status})`;
         throw errors.gemini(message);
       }
       return extractText(payload);
@@ -114,6 +114,30 @@ async function generateContent(parts: GeminiPart[], attempts = 3): Promise<strin
 
 export async function generateText(prompt: string): Promise<string> {
   return generateContent([{ text: prompt }]);
+}
+
+export async function explainStudyImage(input: {
+  mimeType: string;
+  data: string;
+}): Promise<string> {
+  return generateContent([
+    {
+      text: "Explain the visible study material clearly for a university student. Describe relevant text, diagrams, or concepts. If the image is unclear, say what cannot be read rather than guessing.",
+    },
+    { inlineData: { mimeType: input.mimeType, data: input.data } },
+  ]);
+}
+
+export async function answerFromAudio(input: {
+  mimeType: string;
+  data: string;
+}): Promise<string> {
+  return generateContent([
+    {
+      text: "Transcribe this audio, then answer the question or request spoken in it. Clearly label the transcription and answer. If the audio is unclear, explain that instead of guessing.",
+    },
+    { inlineData: { mimeType: input.mimeType, data: input.data } },
+  ]);
 }
 
 export async function extractTimetableFromFile(input: {
@@ -168,5 +192,24 @@ Never guess when the question cannot be read clearly.`,
 }
 
 export async function answerWithContext(prompt: string): Promise<string> {
-  return generateText(prompt);
+  try {
+    return await generateText(prompt);
+  } catch (error) {
+    if (!(error instanceof AppError) || error.code !== "AI_PROVIDER_ERROR") throw error;
+    logger.warn({ code: error.code }, "Using chat fallback after Gemini provider failure");
+    return "The AI service is temporarily unavailable. Your message is saved; please try again shortly.";
+  }
+}
+
+export async function answerFromAudioWithFallback(input: {
+  mimeType: string;
+  data: string;
+}): Promise<string> {
+  try {
+    return await answerFromAudio(input);
+  } catch (error) {
+    if (!(error instanceof AppError) || error.code !== "AI_PROVIDER_ERROR") throw error;
+    logger.warn({ code: error.code }, "Using voice fallback after Gemini provider failure");
+    return "I received your voice message, but the AI service is temporarily unavailable. Please try again shortly.";
+  }
 }

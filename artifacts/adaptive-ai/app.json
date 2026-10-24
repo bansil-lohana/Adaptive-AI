@@ -16,26 +16,39 @@
     "ios": {
       "supportsTablet": false
     },
-    "android": {},
-    "web": {
-      "favicon": "./assets/images/icon.png"
+    "android": {
+      "package": "com.adaptiveai.studyassistant",
+      "versionCode": 1,
+      "permissions": [
+        "CAMERA",
+        "RECORD_AUDIO",
+        "POST_NOTIFICATIONS"
+      ]
     },
     "plugins": [
-      [
-        "expo-router",
-        {
-          "origin": "https://replit.com/"
-        }
-      ],
+      "expo-router",
       "expo-font",
       "expo-web-browser",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow Adaptive AI to access photos you choose to explain."
+        }
+      ],
+      [
+        "expo-audio",
+        {
+          "microphonePermission": "Allow Adaptive AI to record questions for transcription."
+        }
+      ],
       [
         "expo-camera",
         {
           "cameraPermission": "Allow Adaptive AI to use your camera.",
           "recordAudioAndroid": false
         }
-      ]
+      ],
+      "expo-notifications"
     ],
     "experiments": {
       "typedRoutes": true,
