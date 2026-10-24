@@ -52,7 +52,7 @@ Installation
 
 Clone the repository:
 
-git clone https://github.com/your-username/adaptive-ai.git
+git clone https://github.com/bansil-lohana/adaptive-ai.git
 cd adaptive-ai
 
 
